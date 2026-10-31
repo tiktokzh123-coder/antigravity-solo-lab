@@ -1,0 +1,12 @@
+{
+  "name": "agy-evo-os",
+  "displayName": "AGY Evo-OS v3.2 (全栈自进化工业级蜂群工作集群引擎)",
+  "version": "3.2.0",
+  "description": "工业级全栈防偷懒研发与自进化操作系统 v3.2：内置 AGY Swarm Commander 蜂群指挥官体系(1总控+N具名领域工作会话窗口+M子代理)、8步科学实验闭环与研发劳动力复利倍增飞轮(EVO-025/026)、双自适应沟通层(L0小白/L1进阶/L2极客)、单项目+多项目联邦3D交互知识星系图、跨项目记忆收件箱(CROSS_INBOX)与6重门禁派单唤醒及13大原生MCP工具。",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "调用 swarm_status_board 查看当前 1 总控 + N 具名领域工作会话 + M 子代理的全局蜂群态势与研发劳动力倍增系数。",
+    "调用 code_graph_federated_3d 生成跨项目 3D 联邦知识总星系图，并在浏览器中打开。",
+    "调用 security_simplicity_audit 对当前项目做一次安全边界、Ponytail 化繁为简与研发劳动力倍增体检。"
+  ]
+}

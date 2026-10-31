@@ -1,0 +1,113 @@
+{
+  "totalDurationSec": 85.9,
+  "acts": [
+    {
+      "id": "act1",
+      "index": 0,
+      "chapterTag": "// 01 — 随便",
+      "shortLabel": "01 · 随便做点什么 · 第一人称光标主角登场",
+      "subZh": "老板手机发句语音「随便做点什么」· 我是电脑里的单人实验室",
+      "hlWord": "单人实验室",
+      "subEn": "The boss sent a voice note: 'Just make something.' I'm Solo Lab, the autonomous lab inside his Mac.",
+      "startSec": 0,
+      "durationSec": 8.74,
+      "endSec": 8.74
+    },
+    {
+      "id": "act2",
+      "index": 1,
+      "chapterTag": "// 02 — 翻译一下",
+      "shortLabel": "02 · 随便.md · 四连红章不行与全都要暴击",
+      "subZh": "死板PPT？不行。聊久失忆？不行。翻译一下：全都要",
+      "hlWord": "全都要",
+      "subEn": "Static slides? No. Context amnesia? No. Breaking modules? No. Translation: he wants everything.",
+      "startSec": 8.74,
+      "durationSec": 9.26,
+      "endSec": 18
+    },
+    {
+      "id": "act3",
+      "index": 2,
+      "chapterTag": "// 03 — 弹药库",
+      "shortLabel": "03 · 零边际算力声波 · 金框古典油画自画像",
+      "subZh": "谷歌 Ultra 零边际算力 + 三百并发沙盒，连声音都是借来的",
+      "hlWord": "零边际算力",
+      "subEn": "Armed with Google AI Ultra zero-marginal-cost compute & 300x sandboxes. Even my voice is borrowed.",
+      "startSec": 18,
+      "durationSec": 7.78,
+      "endSec": 25.78
+    },
+    {
+      "id": "act4",
+      "index": 3,
+      "chapterTag": "// 04 — 交作业",
+      "shortLabel": "04 · 激光扫描作品墙 · 1+N并发与v1-v8已折叠",
+      "subZh": "1+N 多窗并发 + SQLite 强事务记忆，改了多少版草稿就不展开了",
+      "hlWord": "SQLite 强事务",
+      "subEn": "1+N multi-window swarm & SQLite WAL memory delivered 14.8x output. Failed drafts? Collapsed.",
+      "startSec": 25.78,
+      "durationSec": 9.77,
+      "endSec": 35.55
+    },
+    {
+      "id": "act5",
+      "index": 4,
+      "chapterTag": "// 05 — 凌晨",
+      "shortLabel": "05 · 小白怎么用 · 手机发语音或截图直接遥控电脑",
+      "subZh": "小白用法：手机飞书发语音或截图直接遥控，睡醒收成片",
+      "hlWord": "手机飞书",
+      "subEn": "For beginners: send a voice note or screenshot from mobile Feishu, sleep tight, and wake up to results.",
+      "startSec": 35.55,
+      "durationSec": 9.53,
+      "endSec": 45.08
+    },
+    {
+      "id": "act6",
+      "index": 5,
+      "chapterTag": "// 06 — 蜕变",
+      "shortLabel": "06 · 极客怎么用 · 1+N并发+SQLite强事务+3D星系",
+      "subZh": "极客用法：1+N多窗并发 + SQLite强事务 + 3D星系2跳爆炸半径",
+      "hlWord": "3D星系2跳爆炸半径",
+      "subEn": "For geeks: 1+N swarm, SQLite WAL + 256D vector memory, 3D galaxy 2-hop blast radius & 92-pt QA.",
+      "startSec": 45.08,
+      "durationSec": 11.2,
+      "endSec": 56.28
+    },
+    {
+      "id": "act7",
+      "index": 6,
+      "chapterTag": "// 07 — 字符剧场",
+      "shortLabel": "07 · 克莱因蓝宣言卡 · 小白当团队极客当底座",
+      "subZh": "小白当全自动团队，极客当并发底座，主角可以是AI或你家的猫",
+      "hlWord": "单人实验室",
+      "subEn": "Beginners get a 24/7 studio; geeks get a multi-agent OS. The star can be your AI—or your cat.",
+      "startSec": 56.28,
+      "durationSec": 11.23,
+      "endSec": 67.51
+    },
+    {
+      "id": "act8",
+      "index": 7,
+      "chapterTag": "// 08 — 适合谁",
+      "shortLabel": "08 · 适合谁四项打勾 · 小白与极客双人群覆盖",
+      "subZh": "适合手机发语音遥控电脑的小白，与追求1+N并发零失忆的极客",
+      "hlWord": "小白",
+      "subEn": "For zero-code beginners commanding via voice, and technical geeks scaling 1+N zero-amnesia swarms.",
+      "startSec": 67.51,
+      "durationSec": 9.29,
+      "endSec": 76.8
+    },
+    {
+      "id": "act9",
+      "index": 8,
+      "chapterTag": "// 09 — 拿走",
+      "shortLabel": "09 · 截图此页取景框 · 小白与极客3分钟装好同款",
+      "subZh": "截图这一页交给你的 AI 助手 · 3分钟装好同款单人实验室",
+      "hlWord": "截图这一页",
+      "subEn": "Screenshot this page for your AI assistant to install Solo Lab in 3 minutes. Wait, boss, still awake?!",
+      "startSec": 76.8,
+      "durationSec": 9.1,
+      "endSec": 85.9
+    }
+  ]
+}

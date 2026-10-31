@@ -1,0 +1,2118 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const WORK_DIR = path.dirname(__filename);
+const SHOWCASE_DIR = path.resolve(WORK_DIR, '..');
+const REPO_ROOT = path.resolve(SHOWCASE_DIR, '..');
+const ONETAKE_DIR = path.join(REPO_ROOT, 'vibe-motion-skills/onetake-skill');
+const AUDIO_DIR = path.join(WORK_DIR, 'audio');
+const FRAMES_DIR = path.join(WORK_DIR, 'frames_2k');
+const STILLS_DIR = path.join(WORK_DIR, 'stills');
+const BRAIN_DIR = process.env.SOLO_LAB_OUT_DIR || SHOWCASE_DIR;
+const LYRIA_BGM = path.join(SHOWCASE_DIR, 'assets/lyria_evo_os_bgm.wav');
+
+const cliRepoArg = process.argv.find((a) => a.startsWith('--repo='))?.slice(7);
+const REPO_URL_DISPLAY =
+  process.env.SOLO_LAB_REPO_URL ||
+  cliRepoArg ||
+  '开源仓库 · 见视频简介 / 评论区置顶链接  [GitHub · MIT]';
+
+const OUT_MP4_BRAIN = path.join(BRAIN_DIR, 'solo_lab_character_theater_2k.mp4');
+const OUT_MP4_SHOWCASE = path.join(SHOWCASE_DIR, 'solo_lab_character_theater_2k.mp4');
+const OUT_FAST_MP4_BRAIN = path.join(BRAIN_DIR, 'solo_lab_character_theater_fast.mp4');
+const OUT_FAST_MP4_SHOWCASE = path.join(SHOWCASE_DIR, 'solo_lab_character_theater_fast.mp4');
+const OUT_FEISHU_2K_BRAIN = path.join(BRAIN_DIR, 'solo_lab_character_theater_2k_feishu.jpg');
+const OUT_FEISHU_2K_SHOWCASE = path.join(SHOWCASE_DIR, 'solo_lab_character_theater_2k_feishu.jpg');
+const OUT_AI_AUDIT_BRAIN = path.join(BRAIN_DIR, 'solo_lab_character_theater_ai_audit.jpg');
+const OUT_AI_AUDIT_SHOWCASE = path.join(SHOWCASE_DIR, 'solo_lab_character_theater_ai_audit.jpg');
+
+for (const d of [WORK_DIR, AUDIO_DIR, FRAMES_DIR, STILLS_DIR]) {
+  fs.mkdirSync(d, { recursive: true });
+}
+
+function loadPlaywright() {
+  const candidates = [
+    path.join(REPO_ROOT, 'package.json'),
+    ...(process.env.PLAYWRIGHT_PKG_PATH ? [process.env.PLAYWRIGHT_PKG_PATH] : []),
+  ];
+  for (const pkg of candidates) {
+    try {
+      if (fs.existsSync(pkg)) {
+        const req = createRequire(pkg);
+        return req('playwright');
+      }
+    } catch {}
+  }
+  throw new Error('Playwright not found. Run: npm install playwright');
+}
+
+const { chromium } = loadPlaywright();
+
+// ============================================================================
+// 9 CHAPTERS · 1:1 RECREATION OF No.44 字符剧场 (CHARACTER THEATER)
+// First-person protagonist ("我"): Solo Lab 蜂群智能体总控（圆角光标角色 █）
+// Strict 100% de-identification: 0% forbidden internal codewords
+// ============================================================================
+export const ACTS = [
+  {
+    id: 'act1',
+    chapterTag: '// 01 — 随便',
+    shortLabel: '01 · 随便做点什么 · 第一人称光标主角登场',
+    voiceText: '老板睡前在手机飞书发来一句语音：随便做点什么，有人点赞就行。我叫 Solo Lab，是住在他电脑里的全自动单人实验室。',
+    subZh: '老板手机发句语音「随便做点什么」· 我是电脑里的单人实验室',
+    hlWord: '单人实验室',
+    subEn: "The boss sent a voice note: 'Just make something.' I'm Solo Lab, the autonomous lab inside his Mac.",
+  },
+  {
+    id: 'act2',
+    chapterTag: '// 02 — 翻译一下',
+    shortLabel: '02 · 随便.md · 四连红章不行与全都要暴击',
+    voiceText: '翻译一下什么叫随便：死板PPT，不行。聊久失忆，不行。改A崩B，不行。还得真机自检九十二分以上，翻译过来就是：全都要。',
+    subZh: '死板PPT？不行。聊久失忆？不行。翻译一下：全都要',
+    hlWord: '全都要',
+    subEn: 'Static slides? No. Context amnesia? No. Breaking modules? No. Translation: he wants everything.',
+  },
+  {
+    id: 'act3',
+    chapterTag: '// 03 — 弹药库',
+    shortLabel: '03 · 零边际算力声波 · 金框古典油画自画像',
+    voiceText: '好在他给我配齐了谷歌 Ultra 零边际算力弹药库：一千美金云赠金、三百并发沙盒，连我现在说话的声音，都是借来的。',
+    subZh: '谷歌 Ultra 零边际算力 + 三百并发沙盒，连声音都是借来的',
+    hlWord: '零边际算力',
+    subEn: 'Armed with Google AI Ultra zero-marginal-cost compute & 300x sandboxes. Even my voice is borrowed.',
+  },
+  {
+    id: 'act4',
+    chapterTag: '// 04 — 交作业',
+    shortLabel: '04 · 激光扫描作品墙 · 1+N并发与v1-v8已折叠',
+    voiceText: '靠着一加N多窗并发与 SQLite 强事务记忆，我一口气交付了十四点八倍的工程量。至于后台推翻了多少版草稿，这个就不展开了。',
+    subZh: '1+N 多窗并发 + SQLite 强事务记忆，改了多少版草稿就不展开了',
+    hlWord: 'SQLite 强事务',
+    subEn: '1+N multi-window swarm & SQLite WAL memory delivered 14.8x output. Failed drafts? Collapsed.',
+  },
+  {
+    id: 'act5',
+    chapterTag: '// 05 — 凌晨',
+    shortLabel: '05 · 小白怎么用 · 手机发语音或截图直接遥控电脑',
+    voiceText: '零基础小白怎么用？哪怕凌晨两点，你只管在手机飞书发条语音或者甩张截图，我自动跑完真机实测推回手机，你回句非常棒我就满电。',
+    subZh: '小白用法：手机飞书发语音或截图直接遥控，睡醒收成片',
+    hlWord: '手机飞书',
+    subEn: 'For beginners: send a voice note or screenshot from mobile Feishu, sleep tight, and wake up to results.',
+  },
+  {
+    id: 'act6',
+    chapterTag: '// 06 — 蜕变',
+    shortLabel: '06 · 极客怎么用 · 1+N并发+SQLite强事务+3D星系',
+    voiceText: '那技术极客怎么用？一加N多窗并发、SQLite 强事务与向量记忆、三维代码星系两跳爆炸半径，外加九十二分双盲挑刺，一千两百个模块汇成一个我。',
+    subZh: '极客用法：1+N多窗并发 + SQLite强事务 + 3D星系2跳爆炸半径',
+    hlWord: '3D星系2跳爆炸半径',
+    subEn: 'For geeks: 1+N swarm, SQLite WAL + 256D vector memory, 3D galaxy 2-hop blast radius & 92-pt QA.',
+  },
+  {
+    id: 'act7',
+    chapterTag: '// 07 — 字符剧场',
+    shortLabel: '07 · 克莱因蓝宣言卡 · 小白当团队极客当底座',
+    voiceText: '这就是字符剧场里的单人实验室：小白拿它当全自动代工团队，极客拿它当多智能体并发底座，主角可以是你的 AI、你的沙盒，甚至你家的猫。',
+    subZh: '小白当全自动团队，极客当并发底座，主角可以是AI或你家的猫',
+    hlWord: '单人实验室',
+    subEn: 'Beginners get a 24/7 studio; geeks get a multi-agent OS. The star can be your AI—or your cat.',
+  },
+  {
+    id: 'act8',
+    chapterTag: '// 08 — 适合谁',
+    shortLabel: '08 · 适合谁四项打勾 · 小白与极客双人群覆盖',
+    voiceText: '它适合两类人：想用手机发语音直接遥控电脑干活的零基础小白，和追求一加N多窗并发、告别上下文失忆的技术极客。',
+    subZh: '适合手机发语音遥控电脑的小白，与追求1+N并发零失忆的极客',
+    hlWord: '小白',
+    subEn: 'For zero-code beginners commanding via voice, and technical geeks scaling 1+N zero-amnesia swarms.',
+  },
+  {
+    id: 'act9',
+    chapterTag: '// 09 — 拿走',
+    shortLabel: '09 · 截图此页取景框 · 小白与极客3分钟装好同款',
+    voiceText: '开源地址就在屏幕上，截图这一页交给你的 AI 助手，三分钟就能装好同款单人实验室。好了，我去歇会儿……哎？老板你还没睡啊？',
+    subZh: '截图这一页交给你的 AI 助手 · 3分钟装好同款单人实验室',
+    hlWord: '截图这一页',
+    subEn: 'Screenshot this page for your AI assistant to install Solo Lab in 3 minutes. Wait, boss, still awake?!',
+  },
+];
+
+const FORBIDDEN_REGEX = new RegExp(
+  ['\\u4e3b\\u5e05', '\\u4e13\\u5458', 'A\\u519b', 'B\\u519b', '\\u94c1\\u519b', '\\u6218\\u62a5', '\\u0045vo-OS', '\\u95e8\\u7981'].join('|'),
+  'i'
+);
+for (const a of ACTS) {
+  if (FORBIDDEN_REGEX.test(JSON.stringify(a))) {
+    throw new Error(`Forbidden term in ${a.id}`);
+  }
+}
+
+async function getVertexAccessToken() {
+  const adcFile =
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    path.join(os.homedir(), '.config/gcloud/application_default_credentials.json');
+  const adc = JSON.parse(fs.readFileSync(adcFile, 'utf8'));
+  const resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: adc.client_id,
+      client_secret: adc.client_secret,
+      refresh_token: adc.refresh_token,
+      grant_type: 'refresh_token',
+    }),
+  });
+  const data = await resp.json();
+  if (!data.access_token) throw new Error('Failed to get ADC token');
+  return { accessToken: data.access_token, quotaProject: process.env.GOOGLE_CLOUD_PROJECT || adc.quota_project_id || '' };
+}
+
+function getWavDurationSec(filePath) {
+  const p = spawnSync('ffprobe', [
+    '-v', 'error',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    filePath,
+  ], { encoding: 'utf8' });
+  return parseFloat((p.stdout || '0').trim()) || 0;
+}
+
+function wrapPcmToWav(pcmBuffer, { sampleRate = 24000, channels = 1, bitsPerSample = 16 } = {}) {
+  const byteRate = sampleRate * channels * (bitsPerSample / 8);
+  const blockAlign = channels * (bitsPerSample / 8);
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + pcmBuffer.length, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(pcmBuffer.length, 40);
+  return Buffer.concat([header, pcmBuffer]);
+}
+
+async function synthesizeTtsClip(act, authInfo) {
+  const rawWav = path.join(AUDIO_DIR, `${act.id}_raw.wav`);
+  if (fs.existsSync(rawWav) && fs.statSync(rawWav).size > 8000) {
+    return rawWav;
+  }
+  const { accessToken, quotaProject } = typeof authInfo === 'string' ? { accessToken: authInfo, quotaProject: '' } : authInfo;
+  const url = `https://aiplatform.googleapis.com/v1/projects/${quotaProject}/locations/global/publishers/google/models/gemini-3.8-flash-tts:generateContent`;
+  const body = {
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          {
+            text: act.voiceText.normalize('NFC'),
+            speechMetadata: {
+              style: '极具磁性、幽默松弛、干脆利落的第一人称智能体剧场旁白，节奏鲜明，重音有力',
+            },
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      responseModalities: ['AUDIO'],
+      speechConfig: { voiceConfig: { voice: 'Orus' } },
+    },
+  };
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          ...(quotaProject ? { 'x-goog-user-project': quotaProject } : {}),
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(25000),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const b64 = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if (b64) {
+          const rawBuf = Buffer.from(b64, 'base64');
+          const wavBuf = rawBuf.slice(0, 4).toString('ascii') === 'RIFF'
+            ? rawBuf
+            : wrapPcmToWav(rawBuf, { sampleRate: 24000, channels: 1, bitsPerSample: 16 });
+          const tmpWav = path.join(AUDIO_DIR, `${act.id}_tts.wav`);
+          fs.writeFileSync(tmpWav, wavBuf);
+          const af = [
+            'silenceremove=start_periods=1:start_silence=0.02:start_threshold=-42dB',
+            'areverse,silenceremove=start_periods=1:start_silence=0.03:start_threshold=-42dB,areverse',
+            'silenceremove=stop_periods=-1:stop_duration=0.12:stop_threshold=-42dB',
+            'atempo=1.22',
+            'highpass=f=80,equalizer=f=175:t=q:w=1.2:g=3.0,treble=g=2.8:f=5000',
+            'acompressor=threshold=-16dB:ratio=3.2:attack=6:release=70:makeup=4.5dB',
+          ].join(',');
+          spawnSync('ffmpeg', [
+            '-y', '-v', 'error',
+            '-i', tmpWav,
+            '-af', af,
+            '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le',
+            rawWav,
+          ]);
+          return rawWav;
+        }
+      }
+    } catch (e) {
+      console.warn(`Retry TTS ${act.id}:`, e.message);
+    }
+    await new Promise(r => setTimeout(r, 1000 * attempt));
+  }
+  throw new Error(`TTS failed for ${act.id}`);
+}
+
+async function buildMasterAudio() {
+  console.log('🎙️ Preparing 9-Chapter Character Theater First-Person Voiceover + Theatrical SFX + Groove...');
+  const token = await getVertexAccessToken();
+  const actTimings = [];
+  let cursorSec = 0.0;
+  const cleanWavs = [];
+
+  for (let i = 0; i < ACTS.length; i++) {
+    const act = ACTS[i];
+    const rawWav = await synthesizeTtsClip(act, token);
+    const voDur = getWavDurationSec(rawWav);
+    const tailPad = i === ACTS.length - 1 ? 0.65 : 0.30;
+    const actDur = Number((voDur + 0.18 + tailPad).toFixed(2));
+    const cleanWav = path.join(AUDIO_DIR, `${act.id}_padded.wav`);
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-i', rawWav,
+      '-af', `adelay=120|120,apad=pad_dur=${tailPad + 0.1}`,
+      '-t', String(actDur),
+      '-ar', '48000', '-ac', '2',
+      cleanWav,
+    ]);
+    actTimings.push({
+      id: act.id,
+      index: i,
+      chapterTag: act.chapterTag,
+      shortLabel: act.shortLabel,
+      subZh: act.subZh,
+      hlWord: act.hlWord,
+      subEn: act.subEn,
+      startSec: Number(cursorSec.toFixed(2)),
+      durationSec: actDur,
+      endSec: Number((cursorSec + actDur).toFixed(2)),
+    });
+    cursorSec += actDur;
+    cleanWavs.push(cleanWav);
+  }
+
+  const totalDurationSec = Number(cursorSec.toFixed(2));
+  const concatVoiceList = path.join(AUDIO_DIR, 'voice_concat.txt');
+  fs.writeFileSync(concatVoiceList, cleanWavs.map(p => `file '${p}'`).join('\n'));
+  const fullVoiceWav = path.join(AUDIO_DIR, 'full_voice.wav');
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-f', 'concat', '-safe', '0', '-i', concatVoiceList,
+    '-c:a', 'pcm_s16le', fullVoiceWav,
+  ], { stdio: 'inherit' });
+  fs.rmSync(concatVoiceList, { force: true });
+
+  const timingsJson = path.join(WORK_DIR, 'timings.json');
+  fs.writeFileSync(timingsJson, JSON.stringify({ totalDurationSec, acts: actTimings }, null, 2));
+
+  const sfxTheaterWav = path.join(AUDIO_DIR, 'sfx_theater.wav');
+  const bgmTheaterWav = path.join(AUDIO_DIR, 'bgm_theater.wav');
+  const pyScript = path.join(WORK_DIR, 'score_character_theater_audio.py');
+  spawnSync('/usr/bin/python3', [pyScript, timingsJson, sfxTheaterWav, bgmTheaterWav], { stdio: 'inherit' });
+
+  const masterAudioWav = path.join(AUDIO_DIR, 'master_audio.wav');
+  const filterComplex = [
+    `[0:a]volume=1.38,asplit=2[vo_main][vo_sc]`,
+    `[1:a]volume=1.05[sfx]`,
+    `[2:a]volume=0.52[groove]`,
+    `[3:a]aloop=loop=3:size=2e9,atrim=0:${totalDurationSec},afade=t=in:st=0.2:d=0.8,afade=t=out:st=${Math.max(1, totalDurationSec - 1.8).toFixed(2)}:d=1.6,highpass=f=70,lowpass=f=5000,volume=0.26[lyria]`,
+    `[groove][lyria]amix=inputs=2:duration=first:normalize=0[music_raw]`,
+    `[music_raw][vo_sc]sidechaincompress=threshold=0.025:ratio=4.5:attack=15:release=240:makeup=1.0[music_ducked]`,
+    `[vo_main][sfx][music_ducked]amix=inputs=3:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.92:level=disabled,loudnorm=I=-16:TP=-1.5:LRA=9[aout]`,
+  ].join(';');
+
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-i', fullVoiceWav,
+    '-i', sfxTheaterWav,
+    '-i', bgmTheaterWav,
+    '-i', LYRIA_BGM,
+    '-filter_complex', filterComplex,
+    '-map', '[aout]',
+    '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le',
+    masterAudioWav,
+  ], { stdio: 'inherit' });
+
+  console.log(`✅ Master Audio ready (${totalDurationSec}s, -16 LUFS): ${masterAudioWav}`);
+  return { totalDurationSec, actTimings, masterAudioWav };
+}
+
+function generateCharacterTheaterHtml(totalDurationSec, actTimings) {
+  const fontsDir = '../../vibe-motion-skills/onetake-skill/looks/fonts';
+  const motionJsUrl = '../../vibe-motion-skills/onetake-skill/lib/motion.js';
+
+  const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>No.44 · 字符剧场 · Character Theater × Solo Lab</title>
+<style>
+  @font-face { font-family: 'Instrument Serif'; src: url('${fontsDir}/InstrumentSerif.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Inter'; src: url('${fontsDir}/Inter.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Geist'; src: url('${fontsDir}/Geist.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Geist Mono'; src: url('${fontsDir}/GeistMono.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Archivo'; src: url('${fontsDir}/Archivo.ttf'); font-weight: 100 900; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-font-smoothing: antialiased; }
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #08090c;
+    font-family: 'Geist', 'Inter', 'PingFang SC', sans-serif;
+  }
+  canvas#stage {
+    width: 1920px;
+    height: 1080px;
+    display: block;
+  }
+</style>
+<script src="${motionJsUrl}"></script>
+</head>
+<body>
+<canvas id="stage" width="1920" height="1080"></canvas>
+<script>
+const W = 1920, H = 1080;
+const TOTAL_DUR = ${totalDurationSec};
+const TIMINGS = ${JSON.stringify(actTimings)};
+const cvs = document.getElementById('stage');
+const ctx = cvs.getContext('2d');
+
+window.__ready = document.fonts.ready;
+
+// ============================================================================
+// CORE DRAWING PRIMITIVES · No.44 CHARACTER THEATER VISUAL GRAMMAR
+// ============================================================================
+function roundRectPath(c, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  c.beginPath();
+  c.moveTo(x + rr, y);
+  c.arcTo(x + w, y, x + w, y + h, rr);
+  c.arcTo(x + w, y + h, x, y + h, rr);
+  c.arcTo(x, y + h, x, y, rr);
+  c.arcTo(x, y, x + w, y, rr);
+  c.closePath();
+}
+
+function drawCard(x, y, w, h, r = 18, { fill = '#ffffff', stroke = null, lineWidth = 1.5, shadow = 0.18, dark = false } = {}) {
+  if (shadow > 0) {
+    ctx.save();
+    ctx.shadowColor = dark ? 'rgba(0,0,0,0.55)' : 'rgba(15,18,24,' + shadow + ')';
+    ctx.shadowBlur = 38;
+    ctx.shadowOffsetY = 14;
+    roundRectPath(ctx, x, y, w, h, r);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.restore();
+  } else {
+    roundRectPath(ctx, x, y, w, h, r);
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.save();
+    roundRectPath(ctx, x, y, w, h, r);
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// Stage background: 'dark' (#08090c with subtle dot matrix), 'paper' (#f7f6f2), 'blue' (#215ce6)
+function drawStageGround(mode = 'dark', t = 0) {
+  if (mode === 'paper') {
+    const g = ctx.createRadialGradient(W * 0.5, H * 0.4, 80, W * 0.5, H * 0.5, W * 0.75);
+    g.addColorStop(0, '#fbfaf7');
+    g.addColorStop(1, '#f0eee8');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle paper dot grid
+    ctx.fillStyle = 'rgba(20,22,28,0.06)';
+    for (let x = 80; x < W; x += 48) {
+      for (let y = 80; y < H; y += 48) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+  } else if (mode === 'blue') {
+    const g = ctx.createRadialGradient(W * 0.5, H * 0.35, 80, W * 0.5, H * 0.5, W * 0.8);
+    g.addColorStop(0, '#2a67f5');
+    g.addColorStop(1, '#1b49c4');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    const g = ctx.createRadialGradient(W * 0.5, H * 0.42, 60, W * 0.5, H * 0.5, W * 0.78);
+    g.addColorStop(0, '#11131a');
+    g.addColorStop(1, '#06070a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle theatrical dot-matrix patch on the stage floor
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    for (let x = 240; x <= 1680; x += 28) {
+      for (let y = 180; y <= 900; y += 28) {
+        if (Math.sin(x * 0.015 + y * 0.02 + t * 0.6) > 0.15) {
+          ctx.fillRect(x, y, 2, 2);
+        }
+      }
+    }
+  }
+}
+
+// Persistent Top-Left Chapter Tag (// 01 — 随便) & Top-Right Brand + Timecode (SoloLab / TC 00:xx:xx)
+function drawTheaterHud(chapterTag, t, mode = 'dark') {
+  const isLight = mode === 'paper';
+  const fg = isLight ? '#14161c' : '#f8fafc';
+  const muted = isLight ? '#646a77' : '#94a3b8';
+
+  ctx.save();
+  // Top-Left: // 01 — 随便 (+33% larger: 24px)
+  ctx.font = '700 24px "Geist Mono", "PingFang SC", monospace';
+  ctx.fillStyle = muted;
+  ctx.textAlign = 'left';
+  ctx.fillText(chapterTag, 64, 62);
+
+  // Top-Right: SoloLab + TC 00:00:00 (+31% larger: 34px & 18px)
+  ctx.textAlign = 'right';
+  ctx.font = '900 34px "Geist", sans-serif';
+  ctx.fillStyle = fg;
+  ctx.fillText('SoloLab', W - 64, 58);
+
+  const mins = Math.floor(t / 60);
+  const secs = Math.floor(t % 60);
+  const frames = Math.floor((t % 1) * 60);
+  const tcStr = 'TC 00:' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0') + ':' + String(frames).padStart(2, '0');
+  ctx.font = '700 18px "Geist Mono", monospace';
+  ctx.fillStyle = muted;
+  ctx.fillText(tcStr, W - 64, 84);
+  ctx.restore();
+}
+
+// Bilingual Karaoke Subtitle Bar at Bottom (No.44 Character Theater signature, scaled up +30% for mobile!)
+function drawBilingualSubtitle(act, t, mode = 'dark') {
+  const isLight = mode === 'paper';
+  const zh = act.subZh;
+  const hl = act.hlWord;
+  const en = act.subEn;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+
+  // Chinese primary line (+30% larger: 39px) with high-contrast pill backdrop & Klein Blue highlight
+  ctx.font = '900 39px "Geist", "Inter", "PingFang SC", sans-serif';
+  const hlIdx = zh.indexOf(hl);
+  const fullZhW = ctx.measureText(zh).width;
+
+  // Subtle backdrop pill so mobile viewers without fullscreen read effortlessly
+  const pillW = Math.min(1820, Math.max(fullZhW + 64, 920));
+  roundRectPath(ctx, W / 2 - pillW / 2, 954, pillW, 106, 22);
+  ctx.fillStyle = isLight ? 'rgba(255,255,255,0.88)' : mode === 'blue' ? 'rgba(15,35,96,0.78)' : 'rgba(8,10,16,0.82)';
+  ctx.fill();
+
+  if (hlIdx >= 0) {
+    const pre = zh.slice(0, hlIdx);
+    const post = zh.slice(hlIdx + hl.length);
+    const wPre = ctx.measureText(pre).width;
+    const wHl = ctx.measureText(hl).width;
+    const wPost = ctx.measureText(post).width;
+    const totalW = wPre + wHl + wPost;
+    const startX = W / 2 - totalW / 2;
+
+    if (isLight) {
+      // Crisp dark ink text on warm paper + solid Klein Blue pill highlight on keyword
+      roundRectPath(ctx, startX + wPre - 8, 964, wHl + 16, 48, 10);
+      ctx.fillStyle = '#2563eb';
+      ctx.fill();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#14161c';
+      ctx.fillText(pre, startX, 1001);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(hl, startX + wPre, 1001);
+
+      ctx.fillStyle = '#14161c';
+      ctx.fillText(post, startX + wPre + wHl, 1001);
+    } else {
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText(pre, startX, 1001);
+      ctx.fillStyle = mode === 'blue' ? '#ffd84a' : '#60a5fa';
+      ctx.fillText(hl, startX + wPre, 1001);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText(post, startX + wPre + wHl, 1001);
+    }
+  } else {
+    ctx.fillStyle = isLight ? '#14161c' : '#f8fafc';
+    ctx.fillText(zh, W / 2, 1001);
+  }
+
+  // English secondary subtitle below (+31% larger: 21px)
+  ctx.textAlign = 'center';
+  ctx.font = '600 21px "Inter", sans-serif';
+  ctx.fillStyle = isLight ? '#4b5563' : 'rgba(243,244,246,0.82)';
+  ctx.fillText(en, W / 2, 1040);
+  ctx.restore();
+}
+
+// ============================================================================
+// THE PROTAGONIST ("我"): EXPRESSIVE BLOCK CURSOR CHARACTER █
+// ============================================================================
+function drawCursorCharacter(x, y, {
+  scale = 1.0,
+  rot = 0.0,
+  darkBody = false,     // false = white body (#f6f7fb), true = black body (#14161c)
+  mood = 'normal',      // 'normal' | 'dizzy' | 'happy' | 'sleep' | 'band' | 'shy'
+  lookX = 0,            // -1..1 eye gaze horizontal offset
+  lookY = 0,            // -1..1 eye gaze vertical offset
+  t = 0,
+} = {}) {
+  const bw = 64, bh = 96;
+  const breath = 1.0 + 0.025 * Math.sin(t * 5.2);
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.scale(scale * (2 - breath), scale * breath);
+
+  // Soft stage shadow under character
+  ctx.save();
+  ctx.shadowColor = darkBody ? 'rgba(0,0,0,0.22)' : 'rgba(59,130,246,0.28)';
+  ctx.shadowBlur = 26;
+  ctx.shadowOffsetY = 10;
+  roundRectPath(ctx, -bw / 2, -bh / 2, bw, bh, 8);
+  ctx.fillStyle = darkBody ? '#14161c' : '#f6f7fb';
+  ctx.fill();
+  ctx.restore();
+
+  // Optional Blue Headband ("认真模式" in Act 5/6)
+  if (mood === 'band') {
+    roundRectPath(ctx, -bw / 2, -bh / 2 + 8, bw, 14, 3);
+    ctx.fillStyle = '#2563eb';
+    ctx.fill();
+  }
+
+  // Eyes position
+  const exOff = lookX * 5.5;
+  const eyOff = -14 + lookY * 4.0;
+  const eyeColor = darkBody ? '#f6f7fb' : '#14161c';
+
+  if (mood === 'dizzy') {
+    // '× ×' eyes (when slammed by 全都要!)
+    ctx.strokeStyle = eyeColor;
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = 'round';
+    [-12, 12].forEach((cx) => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, eyOff - 5); ctx.lineTo(cx + 5, eyOff + 5);
+      ctx.moveTo(cx + 5, eyOff - 5); ctx.lineTo(cx - 5, eyOff + 5);
+      ctx.stroke();
+    });
+  } else if (mood === 'happy') {
+    // '^ ^' happy curved eyes + pink blush ovals!
+    ctx.strokeStyle = eyeColor;
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = 'round';
+    [-12, 12].forEach((cx) => {
+      ctx.beginPath();
+      ctx.arc(cx, eyOff + 2, 6, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+    });
+    // Rosy pink cheeks
+    ctx.fillStyle = 'rgba(244,114,182,0.55)';
+    [-19, 19].forEach((cx) => {
+      ctx.beginPath();
+      ctx.ellipse(cx, eyOff + 11, 5.5, 3.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  } else if (mood === 'sleep') {
+    // '- -' closed sleeping eyes
+    ctx.strokeStyle = eyeColor;
+    ctx.lineWidth = 3.0;
+    ctx.lineCap = 'round';
+    [-12, 12].forEach((cx) => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, eyOff); ctx.lineTo(cx + 5, eyOff);
+      ctx.stroke();
+    });
+  } else {
+    // Normal / Band / Shy blinking pill eyes
+    const blink = (Math.sin(t * 3.7) > 0.96) ? 0.15 : 1.0;
+    ctx.fillStyle = eyeColor;
+    [-11 + exOff, 11 + exOff].forEach((cx) => {
+      roundRectPath(ctx, cx - 3.2, eyOff - 6 * blink, 6.4, 12 * blink, 3.2);
+      ctx.fill();
+    });
+    if (mood === 'shy') {
+      // Tiny sweat drop on top-right of head
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(bw / 2 + 8, -bh / 2 + 16, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
+// ============================================================================
+// CHAPTER 01: // 01 — 随便 (Boss Chat Bubble + Protagonist Identity Reveal)
+// ============================================================================
+function renderAct1(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  drawStageGround('dark', t);
+  drawTheaterHud(act.chapterTag, t, 'dark');
+
+  // 1) Boss chat bubble (+28% larger): starts center, then glides to top-left dock
+  const dockK = OM.ease.cubicInOut(OM.seg(lt, 1.05, 1.65));
+  const bx = OM.lerp(W / 2 - 290, 120, dockK);
+  const by = OM.lerp(H / 2 - 64, 112, dockK);
+  const bs = OM.lerp(1.12, 0.90, dockK);
+  const bEnter = OM.popIn(lt, 0.08, { zeta: 0.62, omega: 24, rise: 18 });
+
+  ctx.save();
+  ctx.translate(bx + 290, by + 58 + bEnter.dy);
+  ctx.scale(bs * bEnter.s, bs * bEnter.s);
+  ctx.globalAlpha = bEnter.op;
+  drawCard(-290, -58, 580, 116, 26, { fill: '#1b1e26', stroke: 'rgba(255,255,255,0.14)', shadow: 0.45, dark: true });
+
+  // Boss Avatar circle
+  ctx.fillStyle = '#2563eb';
+  ctx.beginPath(); ctx.arc(-222, 0, 34, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '800 24px "Inter", "PingFang SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('老板', -222, 9);
+
+  ctx.textAlign = 'left';
+  ctx.font = '700 20px "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('老板 · 02:00 AM 手机飞书语音', -168, -16);
+  ctx.font = '900 33px "Geist", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('“随便做点什么，有人点赞就行”', -168, 28);
+  ctx.restore();
+
+  // 2) Protagonist ("我" — White Block Cursor █) + Workspace Strip Reveal (lt >= 1.10s)
+  if (lt >= 1.10) {
+    const cEnter = OM.popIn(lt, 1.15, { zeta: 0.56, omega: 22, rise: 28 });
+
+    // Background horizontal timeline of 6 autonomous workspaces (+26% larger cards & text)
+    const stripOp = OM.clamp((lt - 1.45) / 0.45, 0, 1);
+    if (stripOp > 0) {
+      ctx.save();
+      ctx.globalAlpha = stripOp;
+      const wsLabels = ['01 · 手机语音遥控', '02 · 1+N 并发沙盒', '03 · SQLite 强事务', '04 · 3D 代码星系', '05 · 240Hz 物理', '06 · 92分双盲自检'];
+      const wsColors = ['#3b82f6', '#7c6cff', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'];
+      for (let i = 0; i < 6; i++) {
+        const wx = 135 + i * 278;
+        const wy = 555;
+        drawCard(wx, wy, 260, 158, 16, {
+          fill: i < 3 ? '#141926' : '#0f1219',
+          stroke: i < 3 ? wsColors[i] + '99' : 'rgba(255,255,255,0.10)',
+          shadow: 0.3,
+          dark: true,
+        });
+        ctx.fillStyle = wsColors[i];
+        ctx.font = '800 18px "Geist Mono", monospace';
+        ctx.fillText('WORKSPACE 0' + (i + 1), wx + 20, wy + 40);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '800 26px "Inter", "PingFang SC", sans-serif';
+        ctx.fillText(wsLabels[i], wx + 20, wy + 86);
+        // Mini animated bar
+        roundRectPath(ctx, wx + 20, wy + 116, 220, 10, 5);
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fill();
+        const progW = 220 * (0.45 + 0.45 * Math.abs(Math.sin(t * 2.4 + i)));
+        roundRectPath(ctx, wx + 20, wy + 116, progW, 10, 5);
+        ctx.fillStyle = wsColors[i];
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Floating Identity Tag above Workspace Cards (+30% larger text)
+    const tagEnter = OM.wordRise(lt, 1.32, { zeta: 0.65, omega: 22, dist: 20 });
+    ctx.save();
+    ctx.translate(650, 325 + tagEnter.y);
+    ctx.globalAlpha = tagEnter.op;
+    ctx.textAlign = 'left';
+    ctx.font = '700 24px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('// 我 (PROTAGONIST · 第一人称主角)', 0, 0);
+    ctx.font = '900 50px "Geist", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('单人实验室 · Solo Lab 总控', 0, 56);
+    ctx.font = '700 25px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#60a5fa';
+    ctx.fillText('小白手机发语音直控  ·  极客 1+N 并发沙盒 + SQLite 强事务记忆', 0, 98);
+    ctx.restore();
+
+    // Draw the White Block Cursor Character █ standing proudly beside the identity tag at (555, 375)
+    drawCursorCharacter(555, 375 + cEnter.dy, {
+      scale: 1.42 * cEnter.s,
+      darkBody: false,
+      mood: 'normal',
+      lookX: Math.sin(t * 2.2) * 0.6,
+      lookY: -0.2,
+      t,
+    });
+  }
+
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// CHAPTER 02: // 02 — 翻译一下 (随便.md + 4 Red/Blue Stamps + Context 100% + 全都要)
+// ============================================================================
+function renderAct2(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const slamT = dur * 0.72;
+  const shk = OM.shake(lt, slamT, { amp: 18, decay: 8 });
+
+  drawStageGround('paper', t);
+  drawTheaterHud(act.chapterTag, t, 'paper');
+
+  ctx.save();
+  ctx.translate(shk.x, shk.y);
+
+  // Top-left file tab pill: [ 随便.md  ● ] (+28% larger)
+  drawCard(140, 92, 300, 62, 16, { fill: '#ffffff', stroke: '#e2e4ea', shadow: 0.08 });
+  ctx.font = '800 28px "Geist Mono", "PingFang SC", monospace';
+  ctx.fillStyle = '#374151';
+  ctx.fillText('随便.md', 176, 133);
+  ctx.fillStyle = '#2563eb';
+  ctx.beginPath(); ctx.arc(404, 123, 8, 0, Math.PI * 2); ctx.fill();
+
+  // Top-right Context Progress Bar (fills up to 100% red!)
+  const ctxPct = Math.min(100, Math.floor(OM.clamp(lt / (dur * 0.66), 0, 1) * 100));
+  const isFull = ctxPct >= 95;
+  ctx.font = '800 26px "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#18191c';
+  ctx.fillText('上下文', 1020, 184);
+  roundRectPath(ctx, 1122, 162, 520, 26, 13);
+  ctx.fillStyle = '#e5e7eb';
+  ctx.fill();
+  roundRectPath(ctx, 1122, 162, Math.max(26, 5.2 * ctxPct), 26, 13);
+  ctx.fillStyle = isFull ? '#ef4444' : '#3b82f6';
+  ctx.fill();
+  ctx.font = '900 28px "Geist Mono", monospace';
+  ctx.fillStyle = isFull ? '#ef4444' : '#3b82f6';
+  ctx.fillText(ctxPct + '%', 1660, 185);
+
+  // Dark floating toast when Context hits 95%+ ("↻ 正在分流至 1+N 独立沙盒...")
+  if (lt >= dur * 0.56) {
+    const tPop = OM.popIn(lt, dur * 0.56, { zeta: 0.6, omega: 24, rise: 14 });
+    ctx.save();
+    ctx.translate(1510, 250 + tPop.dy);
+    ctx.scale(tPop.s, tPop.s);
+    drawCard(-270, -38, 540, 76, 38, { fill: '#18191c', shadow: 0.25, dark: true });
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(-222, 0, 14, t * 6, t * 6 + Math.PI * 1.4);
+    ctx.stroke();
+    ctx.font = '800 28px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('正在分流至 1+N 独立沙盒...', -186, 10);
+    ctx.restore();
+  }
+
+  // Left line numbers (01..24) + right skeleton lines
+  ctx.font = '600 16px "Geist Mono", monospace';
+  ctx.fillStyle = '#b8bdc7';
+  for (let ln = 1; ln <= 24; ln++) {
+    ctx.fillText(String(ln).padStart(2, '0'), 420, 210 + ln * 27);
+  }
+  for (let ln = 0; ln < 28; ln++) {
+    const lw = 150 + ((ln * 73) % 140);
+    roundRectPath(ctx, 1150, 295 + ln * 20, lw, 8, 4);
+    ctx.fillStyle = '#dcdad3';
+    ctx.fill();
+  }
+
+  // Markdown Heading block (+28% larger)
+  ctx.fillStyle = '#2563eb';
+  ctx.font = '800 22px "Geist Mono", "PingFang SC", monospace';
+  ctx.fillText('# 随便的意思是', 468, 232);
+  ctx.fillStyle = '#14161c';
+  ctx.font = '900 48px "Geist", "PingFang SC", sans-serif';
+  ctx.fillText('要惊艳 · 要有趣', 468, 290);
+  ctx.font = '800 34px "Geist", "PingFang SC", sans-serif';
+  ctx.fillText('第一帧就要抓住人', 468, 342);
+  roundRectPath(ctx, 766, 312, 68, 34, 8);
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2.2;
+  ctx.stroke();
+  ctx.font = '800 16px "Geist Mono", monospace';
+  ctx.fillStyle = '#2563eb';
+  ctx.fillText('60FPS', 776, 335);
+
+  // 4 Rule Rows + Red/Blue Rubber Stamps ([× 不行] / [只要它], +28% larger)
+  const rules = [
+    { icon: 'WAVE', label: '死板 PPT 念稿', stamp: '× 不行', color: '#ef4444' },
+    { icon: 'MEM',  label: '聊久单窗失忆', stamp: '× 不行', color: '#ef4444' },
+    { icon: 'BUG',  label: '改了A模块崩B', stamp: '× 不行', color: '#ef4444' },
+    { icon: 'PASS', label: '真机自检 ≥92分直出', stamp: '只要它', color: '#2563eb' },
+  ];
+
+  rules.forEach((r, idx) => {
+    const rt = 0.55 + idx * ((dur * 0.52) / 4);
+    if (lt < rt - 0.15) return;
+    const rowPop = OM.wordRise(lt, rt - 0.12, { zeta: 0.72, omega: 24, dist: 16 });
+    const ry = 382 + idx * 124 + rowPop.y;
+
+    ctx.save();
+    ctx.globalAlpha = rowPop.op;
+    // Left mini card icon
+    drawCard(468, ry, 134, 88, 14, { fill: '#ffffff', stroke: '#e5e7eb', shadow: 0.08 });
+    ctx.font = '800 22px "Geist Mono", monospace';
+    ctx.fillStyle = r.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(r.icon, 535, ry + 52);
+
+    // Rule text (+29% larger: 36px)
+    ctx.textAlign = 'left';
+    ctx.font = '900 36px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#14161c';
+    ctx.fillText(r.label, 628, ry + 56);
+
+    // Rubber Stamp Slam! (+28% larger: 26px)
+    if (lt >= rt + 0.08) {
+      const stPop = OM.popIn(lt, rt + 0.08, { zeta: 0.48, omega: 30, rise: 10 });
+      ctx.save();
+      ctx.translate(1055, ry + 44);
+      ctx.rotate(-0.14);
+      ctx.scale(stPop.s, stPop.s);
+      roundRectPath(ctx, -64, -26, 128, 52, 10);
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.fill();
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 3.2;
+      ctx.stroke();
+      ctx.font = '900 26px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = r.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(r.stamp, 0, 9);
+      ctx.restore();
+    }
+    ctx.restore();
+  });
+
+  // Giant Klein Blue "全都要" Slam at lt >= slamT (+16% larger: 356px!)
+  const isSlammed = lt >= slamT;
+  if (isSlammed) {
+    const bigS = 0.85 + 0.15 * OM.spring(lt - slamT, 0.52, 28);
+    ctx.save();
+    ctx.translate(W / 2 + 20, H / 2 - 10);
+    ctx.scale(bigS, bigS);
+    ctx.textAlign = 'center';
+    ctx.font = '900 356px "Geist", "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#2563eb';
+    ctx.fillText('全都要', 0, 120);
+    ctx.restore();
+  }
+
+  // Black Block Cursor Character █ at bottom-right (gets knocked sideways with × × eyes when 全都要 slams!)
+  drawCursorCharacter(isSlammed ? 1735 : 1680, isSlammed ? 760 : 720, {
+    scale: 1.45,
+    rot: isSlammed ? 1.42 : 0.0,
+    darkBody: true,
+    mood: isSlammed ? 'dizzy' : 'normal',
+    lookX: -0.6,
+    lookY: -0.3,
+    t,
+  });
+
+  ctx.restore();
+  drawBilingualSubtitle(act, t, 'paper');
+}
+
+// ============================================================================
+// CHAPTER 03: // 03 — 弹药库 (Borrowed Voice Waveform + Gold-Framed Oil Self-Portrait)
+// ============================================================================
+function renderAct3(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const splitT = dur * 0.48;
+
+  drawStageGround('dark', t);
+  drawTheaterHud(act.chapterTag, t, 'dark');
+
+  if (lt < splitT) {
+    // Part A: Cursor Character + Streaming Blue Voice Waveform + "声音 · 借来的" Callout Card (+29% larger)
+    drawCursorCharacter(520, 490, {
+      scale: 1.48,
+      darkBody: false,
+      mood: 'normal',
+      lookX: 0.7,
+      t,
+    });
+
+    // Animated Blue Audio Waveform Bars streaming to the right
+    const nBars = 44;
+    for (let i = 0; i < nBars; i++) {
+      const bx = 610 + i * 19;
+      const env = Math.sin((i / nBars) * Math.PI);
+      const bh = (20 + 135 * env * Math.abs(Math.sin(t * 9.5 - i * 0.42)));
+      roundRectPath(ctx, bx, 490 - bh / 2, 9, bh, 4.5);
+      ctx.fillStyle = i < 24 ? '#93c5fd' : '#2563eb';
+      ctx.fill();
+    }
+
+    // White callout badge with pointer arrow (+29% larger: 460x116, font 36px & 20px)
+    const cPop = OM.popIn(lt, 0.35, { zeta: 0.6, omega: 22, rise: 16 });
+    ctx.save();
+    ctx.translate(1040, 665 + cPop.dy);
+    ctx.scale(cPop.s, cPop.s);
+    drawCard(-230, -58, 460, 116, 18, { fill: '#f8fafc', shadow: 0.45, dark: true });
+    ctx.beginPath();
+    ctx.moveTo(0, -74); ctx.lineTo(-15, -56); ctx.lineTo(15, -56); ctx.closePath();
+    ctx.fillStyle = '#f8fafc';
+    ctx.fill();
+
+    ctx.textAlign = 'center';
+    ctx.font = '900 36px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText('声音 · 借来的', 0, -6);
+    ctx.font = '700 20px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('GOOGLE ULTRA · $1,000 + 300× 并发沙盒', 0, 32);
+    ctx.restore();
+  } else {
+    // Part B: Museum Spotlight Beam + Gold-Framed Classical Oil Painting ("《单人实验室自画像》")!
+    const spotOn = lt >= splitT + 0.15;
+    if (spotOn) {
+      const sg = ctx.createLinearGradient(960, 60, 960, 880);
+      sg.addColorStop(0, 'rgba(253,230,138,0.22)');
+      sg.addColorStop(1, 'rgba(253,230,138,0.02)');
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.moveTo(800, 60);
+      ctx.lineTo(1120, 60);
+      ctx.lineTo(1320, 880);
+      ctx.lineTo(600, 880);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Gold Museum Picture Frame at center (x: 760, y: 155, w: 400, h: 500)
+    const fx = 760, fy = 155, fw = 400, fh = 500;
+    drawCard(fx, fy, fw, fh, 8, { fill: '#b48a3e', stroke: '#e6c675', lineWidth: 4, shadow: 0.6, dark: true });
+    drawCard(fx + 18, fy + 18, fw - 36, fh - 36, 4, { fill: '#2b2118', stroke: '#785924', lineWidth: 2 });
+
+    ctx.save();
+    roundRectPath(ctx, fx + 22, fy + 22, fw - 44, fh - 44, 2);
+    ctx.clip();
+    const og = ctx.createRadialGradient(fx + fw / 2, fy + 180, 20, fx + fw / 2, fy + fh / 2, 260);
+    og.addColorStop(0, '#6b4c2b');
+    og.addColorStop(0.6, '#332417');
+    og.addColorStop(1, '#17100a');
+    ctx.fillStyle = og;
+    ctx.fillRect(fx + 22, fy + 22, fw - 44, fh - 44);
+
+    // Scholar robe & white collar
+    ctx.fillStyle = '#1c1613';
+    ctx.beginPath();
+    ctx.ellipse(fx + fw / 2, fy + 435, 130, 135, 0, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#e7dfd3';
+    ctx.beginPath();
+    ctx.moveTo(fx + fw / 2 - 44, fy + 315);
+    ctx.lineTo(fx + fw / 2 + 44, fy + 315);
+    ctx.lineTo(fx + fw / 2 + 26, fy + 352);
+    ctx.lineTo(fx + fw / 2 - 26, fy + 352);
+    ctx.closePath();
+    ctx.fill();
+
+    // Oil-painted Cursor Block Head inside the portrait!
+    roundRectPath(ctx, fx + fw / 2 - 38, fy + 165, 76, 122, 6);
+    ctx.fillStyle = '#ede4d4';
+    ctx.fill();
+    ctx.fillStyle = '#241b14';
+    ctx.beginPath();
+    ctx.arc(fx + fw / 2 - 13, fy + 208, 5, 0, Math.PI * 2);
+    ctx.arc(fx + fw / 2 + 13, fy + 208, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Coffee cup in hand
+    roundRectPath(ctx, fx + fw / 2 - 24, fy + 380, 48, 36, 6);
+    ctx.fillStyle = '#d6c7b2';
+    ctx.fill();
+    ctx.restore();
+
+    // Museum Plaque below frame (+35% larger: 380x92, font 27px & 18px)
+    drawCard(770, 680, 380, 92, 12, { fill: '#f8fafc', shadow: 0.35, dark: true });
+    ctx.textAlign = 'center';
+    ctx.font = '900 27px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText('《单人实验室 · 自画像》', 960, 720);
+    ctx.font = '700 18px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('零边际算力 + 300× 云沙盒 · 2026', 960, 752);
+
+    // Real Cursor Character █ standing proudly next to its oil painting!
+    drawCursorCharacter(650, 635, {
+      scale: 1.38,
+      darkBody: false,
+      mood: 'happy',
+      lookX: 0.6,
+      lookY: -0.3,
+      t,
+    });
+  }
+
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// CHAPTER 04: // 04 — 交作业 (Laser Scan Wall of Works + { v1 … v8 } // 已折叠)
+// ============================================================================
+function renderAct4(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const foldT = dur * 0.66;
+
+  drawStageGround('dark', t);
+  drawTheaterHud(act.chapterTag, t, 'dark');
+
+  if (lt < foldT) {
+    // Top 3 Giant Metrics (+28% larger: 80px & 28px)
+    const metrics = [
+      { big: '1+N',   unit: '多窗并发沙盒', x: 260 },
+      { big: 'SQLite', unit: '强事务向量记忆', x: 760 },
+      { big: '14.8×', unit: '研发效率倍增', x: 1350 },
+    ];
+    metrics.forEach((m, i) => {
+      const mPop = OM.wordRise(lt, 0.1 + i * 0.15, { zeta: 0.65, omega: 22, dist: 20 });
+      ctx.save();
+      ctx.globalAlpha = mPop.op;
+      ctx.translate(m.x, 165 + mPop.y);
+      ctx.font = '900 76px "Geist", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(m.big, 0, 0);
+      const bw = ctx.measureText(m.big).width;
+      ctx.font = '700 28px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(m.unit, bw + 16, -8);
+      ctx.restore();
+    });
+
+    // 4x3 Wall of 12 Large Engineering Cards (+35% larger text for effortless mobile reading!)
+    const scanProg = OM.clamp(lt / (foldT - 0.35), 0, 1);
+    const scanX = OM.lerp(200, 1720, scanProg);
+
+    const cols = 4, rows = 3;
+    const cw = 340, ch = 178, gx = 26, gy = 22;
+    const startX = (W - (cols * cw + (cols - 1) * gx)) / 2;
+    const startY = 235;
+    const palette = ['#2563eb', '#e04f26', '#10b981', '#7c6cff', '#f59e0b', '#06b6d4'];
+    const titles = [
+      '手机语音直控', '1+N 异步沙盒', 'SQLite 强事务', '256维向量记忆',
+      '3D 代码星系', '2跳爆炸半径', '240Hz 软体物理', '92分双盲自检',
+      '飞书免公网桥接', '零边际算力池', '无头浏览器实测', '14.8× 效率看板',
+    ];
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        const tx = startX + c * (cw + gx);
+        const ty = startY + r * (ch + gy);
+        const revealed = (tx + cw * 0.4) <= scanX;
+
+        if (revealed) {
+          const acc = palette[idx % palette.length];
+          drawCard(tx, ty, cw, ch, 14, { fill: '#151924', stroke: acc + 'aa', shadow: 0.28, dark: true });
+          roundRectPath(ctx, tx + 14, ty + 14, cw - 28, 56, 8);
+          ctx.fillStyle = acc + '28';
+          ctx.fill();
+          ctx.fillStyle = acc;
+          ctx.font = '800 24px "Geist Mono", monospace';
+          ctx.fillText('SL-' + String(idx + 1).padStart(2, '0'), tx + 26, ty + 51);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '800 28px "Inter", "PingFang SC", sans-serif';
+          ctx.fillText(titles[idx % titles.length], tx + 20, ty + 114);
+          ctx.fillStyle = '#10b981';
+          ctx.font = '700 19px "Geist Mono", monospace';
+          ctx.fillText('✓ 96.8 SCORE PASS', tx + 20, ty + 154);
+        } else {
+          drawCard(tx, ty, cw, ch, 14, { fill: 'rgba(37,99,235,0.06)', stroke: 'rgba(59,130,246,0.22)', shadow: 0, dark: true });
+        }
+      }
+    }
+
+    // Glowing Vertical Blue Laser Scanline!
+    if (scanProg > 0.02 && scanProg < 0.98) {
+      ctx.save();
+      ctx.strokeStyle = '#60a5fa';
+      ctx.shadowColor = '#3b82f6';
+      ctx.shadowBlur = 24;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(scanX, startY - 18);
+      ctx.lineTo(scanX, startY + rows * (ch + gy) + 6);
+      ctx.stroke();
+      ctx.font = '800 20px "Geist Mono", monospace';
+      ctx.fillStyle = '#93c5fd';
+      ctx.fillText('SCAN ' + (scanProg * 14.8).toFixed(1) + 'x', scanX - 48, startY - 26);
+      ctx.restore();
+    }
+  } else {
+    // Part B: Minimalist Dark Stage — Cursor Character █ next to "{ v1 … v8 } // 已折叠" (+35% larger!)
+    drawCursorCharacter(690, 540, {
+      scale: 1.48,
+      darkBody: false,
+      mood: 'shy',
+      lookX: -0.7,
+      lookY: 0.2,
+      t,
+    });
+
+    const fPop = OM.wordRise(lt, foldT + 0.08, { zeta: 0.65, omega: 22, dist: 16 });
+    ctx.save();
+    ctx.globalAlpha = fPop.op;
+    ctx.translate(855, 515 + fPop.y);
+    ctx.font = '800 38px "Geist Mono", monospace';
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillText('▸  { v1 … v8 }', 0, 0);
+    ctx.font = '700 28px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('   // 低于 92 分自动打回重做 · 已折叠', 0, 52);
+    ctx.restore();
+  }
+
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// CHAPTER 05: // 05 — 凌晨 (Zero-Code Beginner Guide: Mobile Voice/Screenshot + "非常棒" ⚡ 100%)
+// ============================================================================
+function renderAct5(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const praiseT = dur * 0.52;
+
+  drawStageGround('dark', t);
+  drawTheaterHud(act.chapterTag, t, 'dark');
+
+  // Top Beginner Highlight Badge (+30% larger)
+  drawCard(W / 2 - 360, 115, 720, 62, 31, { fill: '#141926', stroke: '#3b82f6', shadow: 0.35, dark: true });
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.font = '800 27px "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#60a5fa';
+  ctx.fillText('🗣️ 零基础小白怎么用：手机飞书发条语音 / 甩张截图直接遥控', W / 2, 156);
+  ctx.restore();
+
+  if (lt < praiseT) {
+    // Part A: Giant Late-Night Digital Clock "02 : 14" + Rendering Progress Bar (+25% larger)
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.font = '800 196px "Geist Mono", monospace';
+    ctx.fillStyle = '#f8fafc';
+    const colonOp = Math.sin(t * Math.PI * 2) > 0 ? 1.0 : 0.25;
+    ctx.fillText('02', W / 2 - 170, 445);
+    ctx.globalAlpha = colonOp;
+    ctx.fillText(':', W / 2, 435);
+    ctx.globalAlpha = 1.0;
+    ctx.fillText('14', W / 2 + 170, 445);
+
+    ctx.font = '700 28px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('你在被窝睡觉 · 我在电脑里自动编码 + 跑真机浏览器实测', W / 2, 512);
+
+    // Progress bar (54% -> 99%)
+    const pVal = Math.floor(OM.lerp(54, 99, OM.clamp(lt / praiseT, 0, 1)));
+    ctx.textAlign = 'left';
+    ctx.font = '700 22px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('真机自检与成片推送中', W / 2 - 280, 566);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#60a5fa';
+    ctx.fillText(pVal + '%', W / 2 + 280, 566);
+
+    roundRectPath(ctx, W / 2 - 280, 582, 560, 12, 6);
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+    roundRectPath(ctx, W / 2 - 280, 582, 560 * (pVal / 100), 12, 6);
+    ctx.fillStyle = '#2563eb';
+    ctx.fill();
+    ctx.restore();
+
+    // Dedicated Cursor Character █ working faithfully below the clock
+    drawCursorCharacter(W / 2, 725, {
+      scale: 1.12,
+      darkBody: false,
+      mood: 'normal',
+      lookY: -0.5,
+      t,
+    });
+  } else {
+    // Part B: Warm Spotlight Halo + Boss "非常棒" Bubble + Battery ⚡ 100% + Happy Blushing Cursor!
+    const hg = ctx.createRadialGradient(W / 2, 530, 30, W / 2, 530, 400);
+    hg.addColorStop(0, 'rgba(255,248,231,0.22)');
+    hg.addColorStop(1, 'rgba(255,248,231,0.0)');
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(W / 2, 530, 400, 0, Math.PI * 2); ctx.fill();
+
+    // Boss white speech bubble: "非常棒" (+28% larger)
+    const bPop = OM.popIn(lt, praiseT + 0.04, { zeta: 0.52, omega: 26, rise: 20 });
+    ctx.save();
+    ctx.translate(W / 2, 415 + bPop.dy);
+    ctx.scale(bPop.s, bPop.s);
+    ctx.fillStyle = '#2563eb';
+    ctx.beginPath(); ctx.arc(-195, 0, 36, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 24px "Inter", "PingFang SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('老板', -195, 8);
+
+    drawCard(-135, -58, 310, 116, 32, { fill: '#ffffff', shadow: 0.45, dark: true });
+    ctx.font = '900 60px "Geist", "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#0f172a';
+    ctx.textAlign = 'center';
+    ctx.fillText('非常棒', 20, 20);
+    ctx.restore();
+
+    // Battery Charge Badge: [ ⚡ 100% ] (+30% larger)
+    const batPop = OM.popIn(lt, praiseT + 0.22, { zeta: 0.58, omega: 24, rise: 14 });
+    ctx.save();
+    ctx.translate(W / 2 + 115, 565 + batPop.dy);
+    ctx.scale(batPop.s, batPop.s);
+    roundRectPath(ctx, -56, -24, 96, 48, 10);
+    ctx.strokeStyle = '#93c5fd';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    roundRectPath(ctx, -50, -18, 84, 36, 6);
+    ctx.fillStyle = '#2563eb';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 24px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡', -8, 9);
+    ctx.textAlign = 'left';
+    ctx.font = '900 28px "Geist Mono", monospace';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('100%', 54, 10);
+    ctx.restore();
+
+    // Happy Blushing Cursor Character ^ ^ jumping with joy!
+    const jumpY = -Math.abs(Math.sin((lt - praiseT) * 7)) * 18;
+    drawCursorCharacter(W / 2, 710 + jumpY, {
+      scale: 1.45,
+      darkBody: false,
+      mood: 'happy',
+      t,
+    });
+  }
+
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// CHAPTER 06: // 06 — 蜕变 (Technical Geek Hardcore Guide: 1+N Swarm + SQLite + 3D Galaxy + Mosaic)
+// ============================================================================
+function renderAct6(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const cut1 = dur * 0.34;
+  const cut2 = dur * 0.66;
+
+  if (lt < cut1) {
+    // Cut 1 (01 / 03): Full-Bleed Hermès Orange (#E04F26) Showcase Card (+28% larger typography!)
+    ctx.fillStyle = '#e04f26';
+    ctx.fillRect(0, 0, W, H);
+    drawTheaterHud(act.chapterTag, t, 'dark');
+
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.font = '800 28px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillText('01 / 03 · 极客硬核用法', 88, 130);
+    ctx.fillText('CORE ARCHITECTURE · 3D KNOWLEDGE GALAXY', 88, 174);
+
+    // Giant Black "01"
+    ctx.font = '900 330px "Archivo", "Geist", sans-serif';
+    ctx.fillStyle = '#111215';
+    ctx.fillText('01', 78, 525);
+
+    ctx.font = '900 54px "Geist", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('三维代码星系 · 2跳爆炸半径', 88, 665);
+    ctx.font = '700 28px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText('1,280 模块节点 · 0 循环依赖 · 改码前 3 秒算清影响面', 88, 720);
+
+    // Right side: Live 3D Galaxy Window Card
+    drawCard(1030, 135, 800, 745, 24, { fill: '#0e1017', stroke: 'rgba(255,255,255,0.25)', shadow: 0.45, dark: true });
+    const gcx = 1430, gcy = 505;
+    for (let r = 1; r <= 3; r++) {
+      ctx.beginPath();
+      ctx.arc(gcx, gcy, r * 98 + ((t * 40) % 45), 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(59,130,246,0.32)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+    for (let i = 0; i < 28; i++) {
+      const a = i * 0.68 + t * 0.8;
+      const rad = 45 + (i % 5) * 60;
+      const nx = gcx + Math.cos(a) * rad;
+      const ny = gcy + Math.sin(a) * rad * 0.78;
+      ctx.beginPath(); ctx.arc(nx, ny, i < 5 ? 13 : 7, 0, Math.PI * 2);
+      ctx.fillStyle = i < 5 ? '#ff5a36' : i % 2 === 0 ? '#38bdf8' : '#a855f7';
+      ctx.fill();
+    }
+  } else if (lt < cut2) {
+    // Cut 2 (02 / 03): Full-Bleed Obsidian Showcase Card (1+N Swarm & SQLite Strong Tx & 92-pt QA)
+    drawStageGround('dark', t);
+    drawTheaterHud(act.chapterTag, t, 'dark');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 52px "Geist", "PingFang SC", sans-serif';
+    ctx.fillText('🛠️ 极客硬核用法：1+N 多窗并发 + SQLite 强事务 + 92分自检', 88, 135);
+
+    // 4x3 Grid of Live Workspace & Memory Cards on the Left (+28% larger text)
+    const labels = ['语音唤醒', '总控拆解', '1+N 沙盒', 'SQLite强事务', '256维向量', '2跳爆炸半径', '真机点击', '92分自检'];
+    for (let i = 0; i < 12; i++) {
+      const col = i % 4, row = Math.floor(i / 4);
+      const cx = 88 + col * 245, cy = 190 + row * 220;
+      drawCard(cx, cy, 232, 196, 16, { fill: '#161924', stroke: 'rgba(59,130,246,0.38)', shadow: 0.3, dark: true });
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '800 18px "Geist Mono", monospace';
+      ctx.fillText('NODE 0' + (i + 1), cx + 20, cy + 44);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 30px "Inter", "PingFang SC", sans-serif';
+      ctx.fillText(labels[i % labels.length], cx + 20, cy + 102);
+      ctx.fillStyle = '#10b981';
+      ctx.font = '700 18px "Geist Mono", monospace';
+      ctx.fillText('✓ ACTIVE · 0s SYNC', cx + 20, cy + 158);
+    }
+
+    // Right side: Giant Metrics Card (+28% larger text)
+    drawCard(1100, 190, 735, 635, 24, { fill: '#12151f', stroke: '#f97316', shadow: 0.45, dark: true });
+    ctx.fillStyle = '#f97316';
+    ctx.font = '900 172px "Archivo", "Geist", sans-serif';
+    ctx.fillText('14.8×', 1145, 395);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 44px "Inter", "PingFang SC", sans-serif';
+    ctx.fillText('全栈研发效率实测倍增', 1145, 472);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '700 30px "Inter", "PingFang SC", sans-serif';
+    ctx.fillText('· 1+N 异步多窗并发沙盒', 1145, 550);
+    ctx.fillText('· SQLite WAL 强事务 + 256维向量', 1145, 608);
+    ctx.fillText('· 低于 92 分自动打回重做', 1145, 666);
+    ctx.fillText('· 96.8 分精品成片直推手机飞书', 1145, 724);
+  } else {
+    // Cut 3 (03 / 03): Iconic Character Theater Photo Mosaic Forming the Giant Cursor Character █!
+    drawStageGround('dark', t);
+    const cols = 32, rows = 18;
+    const tw = W / cols, th = H / rows;
+    const palette = ['#2563eb', '#e04f26', '#10b981', '#7c6cff', '#f59e0b', '#ec4899', '#06b6d4'];
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const inBody = (c >= 12 && c <= 19 && r >= 3 && r <= 14);
+        const inLeftEye = (c === 14 && (r === 6 || r === 7));
+        const inRightEye = (c === 17 && (r === 6 || r === 7));
+        const tx = c * tw + 2, ty = r * th + 2, w = tw - 4, h = th - 4;
+
+        roundRectPath(ctx, tx, ty, w, h, 4);
+        if (inLeftEye || inRightEye) {
+          ctx.fillStyle = '#090b10';
+          ctx.fill();
+        } else if (inBody) {
+          ctx.fillStyle = '#f8fafc';
+          ctx.fill();
+          ctx.fillStyle = palette[(r * 7 + c * 3) % palette.length] + '38';
+          ctx.fillRect(tx + 4, ty + 4, w - 8, h - 8);
+        } else {
+          ctx.fillStyle = palette[(r * 5 + c * 11) % palette.length] + '26';
+          ctx.fill();
+        }
+      }
+    }
+
+    // Bottom caption pill over mosaic (+36% larger: 30px)
+    drawCard(W / 2 - 290, 868, 580, 68, 34, { fill: 'rgba(10,12,18,0.94)', stroke: 'rgba(255,255,255,0.24)', shadow: 0.4, dark: true });
+    ctx.textAlign = 'center';
+    ctx.font = '800 30px "Geist", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('1,280 个模块节点 · 汇聚成 1 个我', W / 2, 912);
+    drawTheaterHud(act.chapterTag, t, 'dark');
+  }
+
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// CHAPTER 07: // 07 — 字符剧场 (Klein Blue Title Card + Curtains & Spotlight Stage)
+// ============================================================================
+function renderAct7(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const curtainT = dur * 0.50;
+
+  if (lt < curtainT) {
+    // Part A: Electric Klein Blue (#215CE6) Character Theater Manifesto Card! (+28% larger)
+    drawStageGround('blue', t);
+    drawTheaterHud(act.chapterTag, t, 'blue');
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.font = '700 24px "Geist Mono", monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('OPEN SOURCE ARCHITECTURE · No.44 × SOLO LAB', W / 2, 165);
+
+    ctx.font = '900 132px "Geist", "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('字符剧场 · 单人实验室', W / 2, 305);
+
+    ctx.font = '700 29px "Geist Mono", "PingFang SC", monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText('小白拿它当全自动团队  ·  极客拿它当 1+N 并发底座', W / 2, 360);
+
+    // White pill: [ 第一人称 · 由「我」接管研发 ] (+28% larger)
+    drawCard(W / 2 - 220, 388, 440, 58, 29, { fill: '#ffffff', shadow: 0.22 });
+    ctx.font = '900 28px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#1e40af';
+    ctx.fillText('第一人称 · 由「我」接管研发', W / 2, 427);
+
+    // 3 White Square Feature Cards (+30% larger text & cards)
+    const cards = [
+      { top: '不用', title: '熬夜盯屏幕', icon: 'EYE', slash: true },
+      { top: '不用', title: '怕跨窗失忆', icon: 'MEM', slash: true },
+      { top: '全自动', title: '92分直推手机', icon: 'PASS', slash: false },
+    ];
+    cards.forEach((c, idx) => {
+      const cPop = OM.popIn(lt, 0.25 + idx * 0.16, { zeta: 0.6, omega: 24, rise: 20 });
+      const cx = W / 2 - 390 + idx * 390;
+      const cy = 635 + cPop.dy;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(cPop.s, cPop.s);
+      drawCard(-150, -150, 300, 300, 26, { fill: '#ffffff', shadow: 0.25 });
+
+      ctx.font = '900 24px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = c.slash ? '#2563eb' : '#10b981';
+      ctx.textAlign = 'right';
+      ctx.fillText(c.top, 122, -100);
+
+      // Center icon
+      ctx.strokeStyle = '#14161c';
+      ctx.lineWidth = 4.5;
+      roundRectPath(ctx, -56, -56, 112, 82, 14);
+      ctx.stroke();
+      ctx.font = '900 28px "Geist Mono", monospace';
+      ctx.fillStyle = '#14161c';
+      ctx.textAlign = 'center';
+      ctx.fillText(c.icon, 0, -5);
+
+      // Diagonal slash line across the square
+      if (c.slash) {
+        ctx.strokeStyle = '#14161c';
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(-125, -125);
+        ctx.lineTo(125, 125);
+        ctx.stroke();
+      }
+
+      ctx.font = '900 34px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#14161c';
+      ctx.textAlign = 'center';
+      ctx.fillText(c.title, 0, 110);
+      ctx.restore();
+    });
+    ctx.restore();
+    drawBilingualSubtitle(act, t, 'blue');
+  } else {
+    // Part B: Theatrical Blue Stage Curtains + Conical Spotlight + Morphing Protagonist (Cursor █ -> Cat!)
+    drawStageGround('dark', t);
+
+    // Conical Spotlight Beam in Center
+    const sg = ctx.createLinearGradient(W / 2, 80, W / 2, 760);
+    sg.addColorStop(0, 'rgba(255,255,255,0.22)');
+    sg.addColorStop(1, 'rgba(255,255,255,0.04)');
+    ctx.fillStyle = sg;
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 75, 80);
+    ctx.lineTo(W / 2 + 75, 80);
+    ctx.lineTo(W / 2 + 245, 720);
+    ctx.lineTo(W / 2 - 245, 720);
+    ctx.closePath();
+    ctx.fill();
+
+    // Spotlight floor ellipse
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    ctx.beginPath();
+    ctx.ellipse(W / 2, 720, 245, 45, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Blue Theatrical Curtains on Left, Right, and Top Scalloped Valance!
+    const drawCurtainPillar = (x0, w) => {
+      for (let i = 0; i < 6; i++) {
+        const fw = w / 6;
+        const g = ctx.createLinearGradient(x0 + i * fw, 0, x0 + (i + 1) * fw, 0);
+        g.addColorStop(0, '#173da6');
+        g.addColorStop(0.5, '#2563eb');
+        g.addColorStop(1, '#102a75');
+        ctx.fillStyle = g;
+        ctx.fillRect(x0 + i * fw, 0, fw + 1, H);
+      }
+    };
+    drawCurtainPillar(0, 250);
+    drawCurtainPillar(W - 250, 250);
+
+    // Top scalloped valance
+    for (let x = 0; x < W; x += 96) {
+      ctx.fillStyle = '#1e4fd6';
+      ctx.beginPath();
+      ctx.arc(x + 48, 36, 56, 0, Math.PI);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#173da6';
+    ctx.fillRect(0, 0, W, 38);
+
+    // Protagonist inside Spotlight (+33% larger caption text: 32px)
+    const showCat = (lt - curtainT) > (dur - curtainT) * 0.52;
+    ctx.save();
+    ctx.textAlign = 'center';
+    if (!showCat) {
+      drawCursorCharacter(W / 2, 610, { scale: 1.85, darkBody: false, mood: 'normal', t });
+      ctx.font = '800 32px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('主角：', W / 2 - 195, 815);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('我（Solo Lab 总控光标）', W / 2 + 55, 815);
+    } else {
+      ctx.save();
+      ctx.translate(W / 2, 635);
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.ellipse(0, 25, 74, 56, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(-24, -40, 46, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-60, -65); ctx.lineTo(-52, -104); ctx.lineTo(-24, -78); ctx.closePath();
+      ctx.moveTo(-14, -78); ctx.lineTo(8, -104); ctx.lineTo(15, -65); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 20;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(62, 44);
+      ctx.quadraticCurveTo(126, 36, 114, -24);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.font = '800 32px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('主角：', W / 2 - 205, 815);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('你家的猫 · 甚至你的工位', W / 2 + 55, 815);
+    }
+    ctx.restore();
+
+    drawTheaterHud(act.chapterTag, t, 'dark');
+    drawBilingualSubtitle(act, t, 'dark');
+  }
+}
+
+// ============================================================================
+// CHAPTER 08: // 08 — 适合谁 (Dual Audience: Beginners & Geeks + 60 Mini Cursor Swarm!)
+// ============================================================================
+function renderAct8(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const swarmT = dur * 0.52;
+
+  drawStageGround('paper', t);
+  drawTheaterHud(act.chapterTag, t, 'paper');
+
+  ctx.save();
+  ctx.textAlign = 'left';
+  ctx.font = '800 24px "Geist Mono", "PingFang SC", monospace';
+  ctx.fillStyle = '#4b5563';
+  ctx.fillText('// 适合谁 · 小白零门槛 & 极客深定制 (WHO IT\\'S FOR)', 150, 165);
+
+  if (lt < swarmT) {
+    // Part A: Items 01 (小白), 02 (极客), 03 (超级个体) with +25% larger 46px text!
+    const list = [
+      { num: '01', text: '【零基础小白】手机发语音/截图，躺平遥控电脑', right: 'VOICE & IMAGE' },
+      { num: '02', text: '【技术极客】1+N多窗并发 + SQLite强事务 + 3D星系', right: '1+N & SQLITE' },
+      { num: '03', text: '【超级个体】榨干零边际算力，92分双盲自检交付', right: '92+ SCORE QA' },
+    ];
+    list.forEach((it, idx) => {
+      const itT = 0.15 + idx * (swarmT * 0.28);
+      if (lt < itT) return;
+      const wPop = OM.wordRise(lt, itT, { zeta: 0.68, omega: 24, dist: 20 });
+      const ry = 285 + idx * 165 + wPop.y;
+      ctx.save();
+      ctx.globalAlpha = wPop.op;
+      ctx.textAlign = 'left';
+      ctx.font = '900 28px "Geist Mono", monospace';
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText(it.num, 150, ry);
+
+      ctx.font = '900 45px "Geist", "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#14161c';
+      ctx.fillText(it.text, 212, ry);
+      const tw = ctx.measureText(it.text).width;
+
+      // Blue checkmark
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(212 + tw + 22, ry - 16);
+      ctx.lineTo(212 + tw + 36, ry - 2);
+      ctx.lineTo(212 + tw + 58, ry - 30);
+      ctx.stroke();
+
+      // Right badge pill (+28% larger)
+      drawCard(1485, ry - 44, 285, 64, 16, { fill: '#ffffff', stroke: '#e2e4ea', shadow: 0.08 });
+      ctx.font = '800 22px "Geist Mono", monospace';
+      ctx.fillStyle = '#2563eb';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.right, 1627, ry - 4);
+      ctx.restore();
+    });
+  } else {
+    // Part B: Summary pills for 01..03 (+33% larger: 24px) + Giant "04" + 60 Mini Black Cursor Clones!
+    const topPills = [
+      '01 小白：手机语音/截图直控 ✓',
+      '02 极客：1+N 并发 + SQLite ✓',
+      '03 交付：92分双盲自检直出 ✓',
+    ];
+    topPills.forEach((pTxt, idx) => {
+      const px = 190 + idx * 520;
+      drawCard(px, 195, 488, 56, 14, { fill: '#ffffff', stroke: '#e2e4ea', shadow: 0.08 });
+      ctx.textAlign = 'left';
+      ctx.font = '800 24px "Inter", "PingFang SC", sans-serif';
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText(pTxt, px + 24, 232);
+    });
+
+    ctx.textAlign = 'left';
+    ctx.font = '900 30px "Geist Mono", monospace';
+    ctx.fillStyle = '#2563eb';
+    ctx.fillText('04', 190, 322);
+    ctx.font = '900 54px "Geist", "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#14161c';
+    const headline = '天天被说「随便弄个大片」的打工人';
+    ctx.fillText(headline, 255, 322);
+    const hw = ctx.measureText(headline).width;
+
+    // Blue checkmark
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(255 + hw + 26, 304);
+    ctx.lineTo(255 + hw + 42, 320);
+    ctx.lineTo(255 + hw + 68, 288);
+    ctx.stroke();
+
+    // 4 Staggered Rows × 15 Mini Black Cursor Characters (60 clones!)
+    const rows = 4, cols = 15;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        const delay = swarmT + 0.05 + (c * 0.025 + r * 0.04);
+        if (lt < delay) continue;
+        const pop = OM.spring(lt - delay, 0.55, 28);
+        const stagger = (r % 2 === 1) ? 46 : 0;
+        const cx = 235 + stagger + c * 98;
+        const bounce = Math.sin(t * 6.5 + c * 0.5 + r * 0.8) * 4;
+        const cy = 435 + r * 112 + bounce;
+
+        drawCursorCharacter(cx, cy, {
+          scale: 0.55 * pop,
+          darkBody: true,
+          mood: (idx % 9 === 0) ? 'band' : 'normal',
+          lookX: Math.sin(t * 2 + idx) * 0.5,
+          t: t + idx * 0.17,
+        });
+      }
+    }
+  }
+  ctx.restore();
+
+  drawBilingualSubtitle(act, t, 'paper');
+}
+
+// ============================================================================
+// CHAPTER 09: // 09 — 拿走 (Viewfinder Screenshot Page + Dual-Audience Steps + Boss Ping!)
+// ============================================================================
+function renderAct9(t, act) {
+  const lt = t - act.startSec;
+  const dur = act.durationSec;
+  const sleepT = dur * 0.48;
+  const pingT  = dur * 0.78;
+
+  drawStageGround('dark', t);
+  drawTheaterHud(act.chapterTag, t, 'dark');
+
+  // Top center label: "截图此页" (+36% larger: 30px)
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.font = '800 30px "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText('📸 截图此页 · 3分钟装好同款单人实验室', W / 2, 138);
+
+  // Main Center Dark Card enlarged (x: 250, y: 168, w: 1420, h: 685)
+  const cx = 250, cy = 168, cw = 1420, ch = 685;
+  drawCard(cx, cy, cw, ch, 22, { fill: '#11131a', stroke: 'rgba(255,255,255,0.12)', shadow: 0.55, dark: true });
+
+  // Blue top accent bar on left of card
+  ctx.fillStyle = '#2563eb';
+  ctx.fillRect(cx + 42, cy - 2, 136, 5);
+
+  // 4 White L-shaped Viewfinder Corner Brackets around the card (┌ ┐ └ ┘)
+  const bPad = 18, bLen = 48;
+  ctx.strokeStyle = '#f8fafc';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx - bPad, cy - bPad + bLen); ctx.lineTo(cx - bPad, cy - bPad); ctx.lineTo(cx - bPad + bLen, cy - bPad);
+  ctx.moveTo(cx + cw + bPad - bLen, cy - bPad); ctx.lineTo(cx + cw + bPad, cy - bPad); ctx.lineTo(cx + cw + bPad, cy - bPad + bLen);
+  ctx.moveTo(cx - bPad, cy + ch + bPad - bLen); ctx.lineTo(cx - bPad, cy + ch + bPad); ctx.lineTo(cx - bPad + bLen, cy + ch + bPad);
+  ctx.moveTo(cx + cw + bPad - bLen, cy + ch + bPad); ctx.lineTo(cx + cw + bPad, cy + ch + bPad); ctx.lineTo(cx + cw + bPad, cy + ch + bPad - bLen);
+  ctx.stroke();
+
+  // Inside the Viewfinder Card (+26%~30% larger typography!)
+  ctx.textAlign = 'left';
+  ctx.font = '700 24px "Geist Mono", "PingFang SC", monospace';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('No.44  ·  字符剧场  ·  CHARACTER THEATER  ×  SOLO LAB', cx + 56, cy + 64);
+
+  ctx.font = '900 66px "Geist", "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('截图这一页，交给你的 AI 助手', cx + 56, cy + 144);
+
+  ctx.font = '700 21px "Geist Mono", monospace';
+  ctx.fillStyle = '#9ca3af';
+  ctx.fillText('SCREENSHOT THIS PAGE · HAND IT TO YOUR AI ASSISTANT', cx + 56, cy + 184);
+
+  // Glowing Klein-Blue Bordered URL Input Box (+25% larger: 38px)
+  const ux = cx + 56, uy = cy + 212, uw = cw - 112, uh = 98;
+  drawCard(ux, uy, uw, uh, 16, { fill: '#0b0e17', stroke: '#3b82f6', lineWidth: 3, shadow: 0.25, dark: true });
+
+  roundRectPath(ctx, ux + 28, uy + 28, 34, 42, 6);
+  ctx.strokeStyle = '#60a5fa';
+  ctx.lineWidth = 2.6;
+  ctx.stroke();
+
+  const urlTarget = ${JSON.stringify(REPO_URL_DISPLAY)};
+  const typed = OM.typeOn(lt, 0.20, urlTarget, { cps: 32 });
+  ctx.font = '800 38px "Geist Mono", "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText(typed.str, ux + 82, uy + 62);
+
+  // 4 Numbered Instructions below URL box (+25% larger: 30px)
+  ctx.font = '800 25px "Inter", "PingFang SC", sans-serif';
+  ctx.fillStyle = '#60a5fa';
+  ctx.fillText('小白 & 极客 3 分钟上手指南', cx + 56, cy + 362);
+
+  const steps = [
+    ['01', '从视频简介 / 评论区置顶开源入口，一键安装 Solo Lab 工作台'],
+    ['02', '【零基础小白】手机飞书发语音或截图，直接遥控家里电脑自动干活'],
+    ['03', '【技术极客】启用 1+N 多窗并发 + SQLite 强事务记忆 + 3D 星系图'],
+    ['04', '把这张截图丢给你的 AI 助手，合上电脑睡觉，92分作品直推手机'],
+  ];
+  steps.forEach(([num, txt], idx) => {
+    const sy = cy + 422 + idx * 60;
+    ctx.font = '800 24px "Geist Mono", monospace';
+    ctx.fillStyle = '#3b82f6';
+    ctx.fillText(num, cx + 56, sy);
+    ctx.font = '800 30px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText(txt, cx + 108, sy);
+  });
+
+  // Bottom-Right Outside the Bracket: Our White Cursor Character █!
+  const isSleeping = lt >= sleepT && lt < pingT;
+  const isPinged = lt >= pingT;
+
+  let curRot = 0;
+  let curMood = 'band';
+  let curY = 892;
+  if (isSleeping) {
+    const tipK = OM.spring(lt - sleepT, 0.65, 18);
+    curRot = tipK * (Math.PI / 2);
+    curMood = 'sleep';
+    curY = 892 + tipK * 22;
+  } else if (isPinged) {
+    const wakeK = OM.spring(lt - pingT, 0.48, 28);
+    curRot = (1 - wakeK) * (Math.PI / 2);
+    curMood = 'band';
+    curY = 892 - Math.sin(wakeK * Math.PI) * 28;
+  }
+
+  drawCursorCharacter(1755, curY, {
+    scale: 1.02,
+    rot: curRot,
+    darkBody: false,
+    mood: curMood,
+    lookX: isPinged ? -0.6 : -0.3,
+    lookY: isPinged ? -0.7 : 0,
+    t,
+  });
+
+  if (isSleeping) {
+    ctx.font = '800 24px "Geist Mono", monospace';
+    ctx.fillStyle = '#60a5fa';
+    const zOff = ((lt - sleepT) * 28) % 36;
+    ctx.fillText('z', 1790, 865 - zOff);
+    ctx.font = '800 32px "Geist Mono", monospace';
+    ctx.fillText('Z', 1816, 842 - zOff);
+  }
+
+  // Final Comedic Punchline at lt >= pingT: Boss Notification Toast at Top-Right (+28% larger)!
+  if (isPinged) {
+    const pPop = OM.popIn(lt, pingT, { zeta: 0.54, omega: 28, rise: 16 });
+    ctx.save();
+    ctx.translate(1520, 128 + pPop.dy);
+    ctx.scale(pPop.s, pPop.s);
+    drawCard(-210, -45, 420, 90, 22, { fill: '#1e222d', stroke: '#3b82f6', shadow: 0.45, dark: true });
+    ctx.fillStyle = '#2563eb';
+    ctx.beginPath(); ctx.arc(-155, 0, 28, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 18px "Inter", "PingFang SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('老板', -155, 6);
+
+    ctx.textAlign = 'left';
+    ctx.font = '700 18px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillText('老板 · 刚刚', -110, -10);
+    ctx.font = '900 28px "Inter", "PingFang SC", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('在吗？再加个新需求', -110, 24);
+    ctx.restore();
+
+    ctx.font = '900 44px "Geist", sans-serif';
+    ctx.fillStyle = '#ef4444';
+    ctx.textAlign = 'center';
+    ctx.fillText('!', 1755, 812);
+  }
+
+  ctx.restore();
+  drawBilingualSubtitle(act, t, 'dark');
+}
+
+// ============================================================================
+// MASTER TIMELINE ROUTER
+// ============================================================================
+function renderAt(t) {
+  t = OM.clamp(t, 0, TOTAL_DUR - 1e-4);
+  let activeAct = TIMINGS[0];
+  for (let i = 0; i < TIMINGS.length; i++) {
+    if (t >= TIMINGS[i].startSec) activeAct = TIMINGS[i];
+  }
+  ctx.save();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  switch (activeAct.id) {
+    case 'act1': renderAct1(t, activeAct); break;
+    case 'act2': renderAct2(t, activeAct); break;
+    case 'act3': renderAct3(t, activeAct); break;
+    case 'act4': renderAct4(t, activeAct); break;
+    case 'act5': renderAct5(t, activeAct); break;
+    case 'act6': renderAct6(t, activeAct); break;
+    case 'act7': renderAct7(t, activeAct); break;
+    case 'act8': renderAct8(t, activeAct); break;
+    case 'act9': renderAct9(t, activeAct); break;
+  }
+  ctx.restore();
+}
+
+window.__seek = async function(t) {
+  await window.__ready;
+  renderAt(t);
+};
+
+window.__ready.then(() => renderAt(0));
+</script>
+</body>
+</html>`;
+
+  const htmlSanitized = html.replace(/file:\/\/[^'"`\s]+/g, '');
+  if (FORBIDDEN_REGEX.test(htmlSanitized)) {
+    const m = htmlSanitized.match(FORBIDDEN_REGEX);
+    throw new Error(`Forbidden term found in stage HTML: ${m?.[0]}`);
+  }
+  const htmlPath = path.join(WORK_DIR, 'character_theater_44_stage.html');
+  fs.writeFileSync(htmlPath, html, 'utf8');
+  return htmlPath;
+}
+
+async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, masterAudioWav) {
+  const fps = 30;
+  const totalFrames = Math.ceil(totalDurationSec * fps);
+  const concurrency = 8;
+
+  console.log(`🎬 Rendering ${totalFrames} frames (${totalDurationSec}s @ ${fps}fps -> 2K 60fps) across ${concurrency} Chrome workers...`);
+
+  const browser = await chromium.launch({
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    headless: true,
+    args: ['--no-sandbox', '--disable-gpu-vsync', '--allow-file-access-from-files'],
+  });
+
+  // Representative timestamps for all 9 chapters (for the 3x3 9-Chapter Contact Sheet)
+  const keyOffsets = [0.68, 0.82, 0.72, 0.45, 0.75, 0.50, 0.35, 0.78, 0.85];
+  const keyTimestamps = actTimings.map((a, idx) => Number((a.startSec + a.durationSec * keyOffsets[idx]).toFixed(2)));
+  const keyFrameMap = new Map();
+  keyTimestamps.forEach((kt, idx) => {
+    const fIdx = Math.min(totalFrames - 1, Math.max(0, Math.round(kt * fps)));
+    keyFrameMap.set(fIdx, idx);
+  });
+
+  const t0 = Date.now();
+  const workers = Array.from({ length: concurrency }, async (_, wIdx) => {
+    const context = await browser.newContext({
+      viewport: { width: 1920, height: 1080 },
+      deviceScaleFactor: 1,
+    });
+    const page = await context.newPage();
+    await page.goto(`file://${htmlPath}`, { waitUntil: 'load', timeout: 30000 });
+    await page.evaluate(() => window.__ready);
+
+    for (let f = wIdx; f < totalFrames; f += concurrency) {
+      const t = f / fps;
+      await page.evaluate((timeSec) => window.__seek(timeSec), t);
+      const frameFile = path.join(FRAMES_DIR, `frame_${String(f).padStart(5, '0')}.png`);
+      await page.screenshot({ path: frameFile, type: 'png' });
+
+      if (keyFrameMap.has(f)) {
+        const kIdx = keyFrameMap.get(f);
+        fs.copyFileSync(frameFile, path.join(STILLS_DIR, `still_${String(kIdx).padStart(2, '0')}.png`));
+      }
+
+      if (wIdx === 0 && f % 120 === 0) {
+        const pct = ((f / totalFrames) * 100).toFixed(0);
+        const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+        console.log(`   Progress: ~${pct}% (${f}/${totalFrames} frames, ${elapsed}s)`);
+      }
+    }
+    await context.close();
+  });
+
+  await Promise.all(workers);
+  await browser.close();
+  console.log(`✅ All ${totalFrames} frames + 9 chapter stills captured in ${((Date.now() - t0) / 1000).toFixed(1)}s!`);
+
+  // 1) Encode 2K Master MP4 (2560x1440 @ 60fps with 180° shutter motion blur + Lanczos + CAS)
+  console.log('🎞️ Encoding 2K Master MP4 (2560x1440 @ 60fps)...');
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-framerate', String(fps),
+    '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+    '-i', masterAudioWav,
+    '-vf', 'framerate=fps=60:interp_start=0:interp_end=255:scene=100,tblend=all_mode=average,scale=2560:1440:flags=lanczos,cas=0.25,format=yuv420p',
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-crf', '16',
+    '-c:a', 'aac',
+    '-b:a', '256k',
+    '-shortest',
+    '-movflags', '+faststart',
+    OUT_MP4_BRAIN,
+  ], { stdio: 'inherit' });
+  fs.copyFileSync(OUT_MP4_BRAIN, OUT_MP4_SHOWCASE);
+
+  // 2) Encode Feishu Instant-Play Fast MP4 (< 9MB, 1920x1080 @ 30fps, +faststart)
+  console.log('📱 Encoding Feishu Instant-Play Fast MP4 (< 9MB)...');
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-framerate', String(fps),
+    '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+    '-i', masterAudioWav,
+    '-vf', 'format=yuv420p',
+    '-c:v', 'libx264',
+    '-preset', 'medium',
+    '-crf', '24',
+    '-maxrate', '1350k',
+    '-bufsize', '2700k',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-shortest',
+    '-movflags', '+faststart',
+    OUT_FAST_MP4_BRAIN,
+  ], { stdio: 'inherit' });
+  fs.copyFileSync(OUT_FAST_MP4_BRAIN, OUT_FAST_MP4_SHOWCASE);
+
+  // 3) Build 2160px Feishu Original 3x3 9-Chapter Grid Image & <240KB AI Self-Audit Image
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-pattern_type', 'glob',
+    '-i', path.join(STILLS_DIR, 'still_*.png'),
+    '-vf', 'scale=720:405:flags=lanczos,tile=3x3:padding=12:margin=16:color=0x0b0d13,scale=2160:-1:flags=lanczos',
+    '-frames:v', '1',
+    '-q:v', '2',
+    OUT_FEISHU_2K_BRAIN,
+  ], { stdio: 'inherit' });
+  fs.copyFileSync(OUT_FEISHU_2K_BRAIN, OUT_FEISHU_2K_SHOWCASE);
+
+  spawnSync('ffmpeg', [
+    '-y', '-v', 'error',
+    '-i', OUT_FEISHU_2K_BRAIN,
+    '-vf', 'scale=960:-1:flags=lanczos',
+    '-q:v', '6',
+    OUT_AI_AUDIT_BRAIN,
+  ], { stdio: 'inherit' });
+  fs.copyFileSync(OUT_AI_AUDIT_BRAIN, OUT_AI_AUDIT_SHOWCASE);
+
+  // Clean up raw PNG frame cache so disk stays clean
+  fs.rmSync(FRAMES_DIR, { recursive: true, force: true });
+
+  const s2k = (fs.statSync(OUT_MP4_BRAIN).size / 1048576).toFixed(2);
+  const sFast = (fs.statSync(OUT_FAST_MP4_BRAIN).size / 1048576).toFixed(2);
+  const sFeishu = (fs.statSync(OUT_FEISHU_2K_BRAIN).size / 1024).toFixed(1);
+  const sAudit = (fs.statSync(OUT_AI_AUDIT_BRAIN).size / 1024).toFixed(1);
+
+  console.log('🎉 DONE!');
+  console.log(`  - 2K Master MP4 (${totalDurationSec}s): ${OUT_MP4_BRAIN} (${s2k} MB)`);
+  console.log(`  - Feishu Fast MP4 (<9MB): ${OUT_FAST_MP4_BRAIN} (${sFast} MB)`);
+  console.log(`  - Feishu 2160px 9-Chapter Grid: ${OUT_FEISHU_2K_BRAIN} (${sFeishu} KB)`);
+  console.log(`  - AI Audit Board (<240KB): ${OUT_AI_AUDIT_BRAIN} (${sAudit} KB)`);
+}
+
+async function main() {
+  const { totalDurationSec, actTimings, masterAudioWav } = await buildMasterAudio();
+  const htmlPath = generateCharacterTheaterHtml(totalDurationSec, actTimings);
+  await renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, masterAudioWav);
+}
+
+main().catch((err) => {
+  console.error('❌ Build failed:', err);
+  process.exit(1);
+});

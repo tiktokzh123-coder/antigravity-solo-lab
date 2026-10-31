@@ -1,0 +1,20 @@
+{
+  "command": "node",
+  "args": [
+    "server.mjs"
+  ],
+  "description": "AGY Evo-OS v3.1 多项目联邦 3D 知识星系与跨对话拓扑查看器",
+  "display_name": "3D 联邦知识星系 (Evo-OS)",
+  "has_web_ui": true,
+  "restart_policy": "always",
+  "ui_config": {
+    "display_name": "3D 联邦知识星系 (Evo-OS)",
+    "views": [
+      {
+        "entrypoint": "SIDECAR_UI_ENTRYPOINT_AUX_PANE",
+        "path": "/",
+        "title": "3D 联邦知识星系 (Evo-OS)"
+      }
+    ]
+  }
+}

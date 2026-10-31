@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-10-31T20:42:16.069Z",
+  "defaultPermissions": [
+    "clipboard-read",
+    "clipboard-write",
+    "notifications"
+  ],
+  "acceptDownloads": true,
+  "ignoreHTTPSErrors": true,
+  "chromiumLaunchArgs": [
+    "--disable-notifications-prompt",
+    "--enable-features=ClipboardContentSetting",
+    "--auto-select-desktop-capture-source=Entire screen"
+  ]
+}

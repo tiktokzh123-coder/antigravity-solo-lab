@@ -1,0 +1,36 @@
+{
+  "name": "agy-evo-os",
+  "version": "3.2.0",
+  "description": "Universal Full-Stack Self-Evolving Agent Operating System (1+N+M Swarm Commander, 6 Living Memory Ledgers, 3D Code Galaxy, 8-Step RSI Flywheel, 30 Anti-Sloppiness Guardrails & Feishu Mobile Bridge)",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "agy-evo-os": "./scripts/evo-memory-mcp-server.mjs"
+  },
+  "scripts": {
+    "install-os": "bash ./install.sh",
+    "mcp": "node ./scripts/evo-memory-mcp-server.mjs",
+    "feishu-bridge": "node ./bridges/feishu-commander-bridge.mjs",
+    "audit": "node ./scripts/security-and-simplicity-audit.mjs",
+    "graph-3d": "node ./scripts/code-graph-3d-generator.mjs",
+    "federated-3d": "node ./scripts/federated-graph-3d-generator.mjs",
+    "preflight": "node ./scripts/universal-preflight-gate.mjs"
+  },
+  "keywords": [
+    "ai-agent",
+    "vibe-coding",
+    "self-evolving",
+    "mcp-server",
+    "swarm-commander",
+    "3d-knowledge-graph",
+    "antigravity",
+    "feishu-bridge",
+    "fullstack-guardrails"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.35.0"
+  }
+}

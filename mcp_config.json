@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "node",
+      "args": [
+        "~/.gemini/config/plugins/agy-evo-os/scripts/evo-memory-mcp-server.mjs"
+      ]
+    }
+  }
+}
