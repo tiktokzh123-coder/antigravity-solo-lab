@@ -105,7 +105,7 @@
 ### Step 1：10 秒一键安装至 Google Antigravity（谷歌反重力引擎）
 
 ```bash
-git clone https://github.com/your-username/antigravity-solo-lab.git
+git clone https://github.com/tiktokzh123-coder/antigravity-solo-lab.git
 cd antigravity-solo-lab
 
 # 一键将全局规则、14 大 MCP 引擎、5 大分域 Skill SOP 与 3D 星系面板挂载至 ~/.gemini/config/plugins/agy-evo-os
@@ -131,7 +131,7 @@ npm run feishu-bridge
 npm run graph-3d -- /path/to/your-project --open
 
 # 2. 将《No.44 · 字符剧场》第 9 幕中的开源指引替换为你自己的真实 GitHub 仓库地址并重渲成片
-bash showcase/character_theater_44/set-github-url.sh "github.com/your-username/antigravity-solo-lab"
+bash showcase/character_theater_44/set-github-url.sh "github.com/tiktokzh123-coder/antigravity-solo-lab"
 ```
 
 ---
@@ -259,7 +259,7 @@ For power Vibe Coders and systems engineers, **Solo Lab** eliminates the four ch
 ### Step 1: 10-Second One-Click Install into Google Antigravity IDE
 
 ```bash
-git clone https://github.com/your-username/antigravity-solo-lab.git
+git clone https://github.com/tiktokzh123-coder/antigravity-solo-lab.git
 cd antigravity-solo-lab
 
 # Mount global rules, 14 MCP engines, 5 SOP skills, and 3D Galaxy Sidecar into ~/.gemini/config/plugins/agy-evo-os
@@ -285,7 +285,7 @@ npm run feishu-bridge
 npm run graph-3d -- /path/to/your-project --open
 
 # 2. Replace Act 9 of the Character Theater video with your real GitHub URL and re-render
-bash showcase/character_theater_44/set-github-url.sh "github.com/your-username/antigravity-solo-lab"
+bash showcase/character_theater_44/set-github-url.sh "github.com/tiktokzh123-coder/antigravity-solo-lab"
 ```
 
 ---

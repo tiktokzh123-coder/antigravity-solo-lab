@@ -29,10 +29,10 @@ gh repo create antigravity-solo-lab --public --source=. --remote=origin --push
 目前 [`showcase/solo_lab_character_theater_2k.mp4`](./showcase/solo_lab_character_theater_2k.mp4) 第 9 幕取景框中展示的是通用指引：
 - `GitHub 搜索：Solo Lab · 单人实验室（或直接截图本画面发给你的 AI 助手一键安装）`
 
-当您的 GitHub 仓库创建完成后，只需运行一行命令，即可将第 9 幕替换为您的真实仓库地址（例如 `github.com/您的用户名/antigravity-solo-lab`）并自动重渲 2K 成片与秒开版：
+当您的 GitHub 仓库创建完成后，只需运行一行命令，即可将第 9 幕替换为您的真实仓库地址（例如 `github.com/tiktokzh123-coder/antigravity-solo-lab`）并自动重渲 2K 成片与秒开版：
 
 ```bash
-bash showcase/character_theater_44/set-github-url.sh "github.com/<您的GitHub用户名>/antigravity-solo-lab"
+bash showcase/character_theater_44/set-github-url.sh "github.com/tiktokzh123-coder/antigravity-solo-lab"
 ```
 
 ---

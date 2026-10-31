@@ -100,7 +100,7 @@ For power Vibe Coders and systems engineers, **Solo Lab** eliminates the four ch
 
 ```bash
 # 1. Install into Google Antigravity IDE (~/.gemini/config/plugins/agy-evo-os)
-git clone https://github.com/your-username/antigravity-solo-lab.git
+git clone https://github.com/tiktokzh123-coder/antigravity-solo-lab.git
 cd antigravity-solo-lab
 ./install.sh
 

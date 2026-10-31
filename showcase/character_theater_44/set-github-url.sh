@@ -8,7 +8,7 @@ set -euo pipefail
 
 if [ $# -lt 1 ]; then
   echo "用法: bash $0 <GitHub仓库地址>"
-  echo "示例: bash $0 \"github.com/your-username/solo-lab\""
+  echo "示例: bash $0 \"github.com/tiktokzh123-coder/antigravity-solo-lab\""
   exit 1
 fi
 
@@ -16,5 +16,5 @@ REPO_URL="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "🚀 正在将字符剧场第 9 幕仓库地址更新为: ${REPO_URL}"
-SOLO_LAB_REPO_URL="${REPO_URL}" node "${SCRIPT_DIR}/build_character_theater_44.mjs" --repo="${REPO_URL}"
+SOLO_LAB_REPO_URL="${REPO_URL}" node "${SCRIPT_DIR}/build_character_theater_44.mjs" --repo="${REPO_URL}" --fast-act9
 echo "✅ 渲染完成！最新 2K 成片已输出至 showcase/solo_lab_character_theater_2k.mp4"

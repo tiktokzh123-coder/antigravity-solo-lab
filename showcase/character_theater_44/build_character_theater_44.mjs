@@ -20,7 +20,7 @@ const cliRepoArg = process.argv.find((a) => a.startsWith('--repo='))?.slice(7);
 const REPO_URL_DISPLAY =
   process.env.SOLO_LAB_REPO_URL ||
   cliRepoArg ||
-  '开源仓库 · 见视频简介 / 评论区置顶链接  [GitHub · MIT]';
+  'github.com/tiktokzh123-coder/antigravity-solo-lab';
 
 const OUT_MP4_BRAIN = path.join(BRAIN_DIR, 'solo_lab_character_theater_2k.mp4');
 const OUT_MP4_SHOWCASE = path.join(SHOWCASE_DIR, 'solo_lab_character_theater_2k.mp4');
@@ -36,9 +36,17 @@ for (const d of [WORK_DIR, AUDIO_DIR, FRAMES_DIR, STILLS_DIR]) {
 }
 
 function loadPlaywright() {
+  const parentDir = path.resolve(REPO_ROOT, '..');
+  let siblingPkgs = [];
+  try {
+    siblingPkgs = fs.readdirSync(parentDir)
+      .map((name) => path.join(parentDir, name, 'package.json'))
+      .filter((p) => fs.existsSync(p));
+  } catch {}
   const candidates = [
     path.join(REPO_ROOT, 'package.json'),
     ...(process.env.PLAYWRIGHT_PKG_PATH ? [process.env.PLAYWRIGHT_PKG_PATH] : []),
+    ...siblingPkgs,
   ];
   for (const pkg of candidates) {
     try {
@@ -1842,7 +1850,7 @@ function renderAct9(t, act) {
   ctx.fillText('小白 & 极客 3 分钟上手指南', cx + 56, cy + 362);
 
   const steps = [
-    ['01', '从视频简介 / 评论区置顶开源入口，一键安装 Solo Lab 工作台'],
+    ['01', '打开上方 GitHub 开源仓库，10 秒一键安装至谷歌反重力引擎 IDE'],
     ['02', '【零基础小白】手机飞书发语音或截图，直接遥控家里电脑自动干活'],
     ['03', '【技术极客】启用 1+N 多窗并发 + SQLite 强事务记忆 + 3D 星系图'],
     ['04', '把这张截图丢给你的 AI 助手，合上电脑睡觉，92分作品直推手机'],
@@ -1978,8 +1986,11 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
   const fps = 30;
   const totalFrames = Math.ceil(totalDurationSec * fps);
   const concurrency = 8;
-
-  console.log(`🎬 Rendering ${totalFrames} frames (${totalDurationSec}s @ ${fps}fps -> 2K 60fps) across ${concurrency} Chrome workers...`);
+  const isFastAct9 =
+    process.argv.includes('--fast-act9') &&
+    fs.existsSync(OUT_MP4_SHOWCASE) &&
+    fs.existsSync(OUT_FAST_MP4_SHOWCASE) &&
+    fs.existsSync(path.join(STILLS_DIR, 'still_07.png'));
 
   const browser = await chromium.launch({
     executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -1996,6 +2007,16 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
     keyFrameMap.set(fIdx, idx);
   });
 
+  const act9StartSec = actTimings[8].startSec;
+  const startFrame = isFastAct9 ? Math.round(act9StartSec * fps) : 0;
+  const framesToRender = totalFrames - startFrame;
+
+  console.log(
+    isFastAct9
+      ? `⚡ Fast Act 9 Re-render: capturing ${framesToRender} frames (${act9StartSec}s..${totalDurationSec}s) across ${concurrency} workers...`
+      : `🎬 Rendering ${totalFrames} frames (${totalDurationSec}s @ ${fps}fps -> 2K 60fps) across ${concurrency} Chrome workers...`
+  );
+
   const t0 = Date.now();
   const workers = Array.from({ length: concurrency }, async (_, wIdx) => {
     const context = await browser.newContext({
@@ -2006,10 +2027,12 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
     await page.goto(`file://${htmlPath}`, { waitUntil: 'load', timeout: 30000 });
     await page.evaluate(() => window.__ready);
 
-    for (let f = wIdx; f < totalFrames; f += concurrency) {
+    for (let i = wIdx; i < framesToRender; i += concurrency) {
+      const f = startFrame + i;
       const t = f / fps;
       await page.evaluate((timeSec) => window.__seek(timeSec), t);
-      const frameFile = path.join(FRAMES_DIR, `frame_${String(f).padStart(5, '0')}.png`);
+      const outIdx = isFastAct9 ? i : f;
+      const frameFile = path.join(FRAMES_DIR, `frame_${String(outIdx).padStart(5, '0')}.png`);
       await page.screenshot({ path: frameFile, type: 'png' });
 
       if (keyFrameMap.has(f)) {
@@ -2017,10 +2040,10 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
         fs.copyFileSync(frameFile, path.join(STILLS_DIR, `still_${String(kIdx).padStart(2, '0')}.png`));
       }
 
-      if (wIdx === 0 && f % 120 === 0) {
-        const pct = ((f / totalFrames) * 100).toFixed(0);
+      if (wIdx === 0 && i % 120 === 0) {
+        const pct = ((i / framesToRender) * 100).toFixed(0);
         const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
-        console.log(`   Progress: ~${pct}% (${f}/${totalFrames} frames, ${elapsed}s)`);
+        console.log(`   Progress: ~${pct}% (${i}/${framesToRender} frames, ${elapsed}s)`);
       }
     }
     await context.close();
@@ -2028,47 +2051,97 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
 
   await Promise.all(workers);
   await browser.close();
-  console.log(`✅ All ${totalFrames} frames + 9 chapter stills captured in ${((Date.now() - t0) / 1000).toFixed(1)}s!`);
+  console.log(`✅ ${framesToRender} frames captured in ${((Date.now() - t0) / 1000).toFixed(1)}s!`);
 
-  // 1) Encode 2K Master MP4 (2560x1440 @ 60fps with 180° shutter motion blur + Lanczos + CAS)
-  console.log('🎞️ Encoding 2K Master MP4 (2560x1440 @ 60fps)...');
-  spawnSync('ffmpeg', [
-    '-y', '-v', 'error',
-    '-framerate', String(fps),
-    '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
-    '-i', masterAudioWav,
-    '-vf', 'framerate=fps=60:interp_start=0:interp_end=255:scene=100,tblend=all_mode=average,scale=2560:1440:flags=lanczos,cas=0.25,format=yuv420p',
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-crf', '16',
-    '-c:a', 'aac',
-    '-b:a', '256k',
-    '-shortest',
-    '-movflags', '+faststart',
-    OUT_MP4_BRAIN,
-  ], { stdio: 'inherit' });
-  fs.copyFileSync(OUT_MP4_BRAIN, OUT_MP4_SHOWCASE);
+  if (isFastAct9) {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'solo-act9-'));
+    const p1_2k = path.join(tmpDir, 'p1_2k.mp4');
+    const p2_2k = path.join(tmpDir, 'p2_2k.mp4');
+    const list2k = path.join(tmpDir, 'list2k.txt');
+    const p1_fast = path.join(tmpDir, 'p1_fast.mp4');
+    const p2_fast = path.join(tmpDir, 'p2_fast.mp4');
+    const listFast = path.join(tmpDir, 'listFast.txt');
 
-  // 2) Encode Feishu Instant-Play Fast MP4 (< 9MB, 1920x1080 @ 30fps, +faststart)
-  console.log('📱 Encoding Feishu Instant-Play Fast MP4 (< 9MB)...');
-  spawnSync('ffmpeg', [
-    '-y', '-v', 'error',
-    '-framerate', String(fps),
-    '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
-    '-i', masterAudioWav,
-    '-vf', 'format=yuv420p',
-    '-c:v', 'libx264',
-    '-preset', 'medium',
-    '-crf', '24',
-    '-maxrate', '1350k',
-    '-bufsize', '2700k',
-    '-c:a', 'aac',
-    '-b:a', '128k',
-    '-shortest',
-    '-movflags', '+faststart',
-    OUT_FAST_MP4_BRAIN,
-  ], { stdio: 'inherit' });
-  fs.copyFileSync(OUT_FAST_MP4_BRAIN, OUT_FAST_MP4_SHOWCASE);
+    // Cut 0..act9StartSec video-only from existing 2K & Fast MP4s
+    spawnSync('ffmpeg', ['-y', '-v', 'error', '-i', OUT_MP4_SHOWCASE, '-t', String(act9StartSec), '-an', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '16', '-r', '60', '-pix_fmt', 'yuv420p', p1_2k]);
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-framerate', String(fps),
+      '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+      '-vf', 'framerate=fps=60:interp_start=0:interp_end=255:scene=100,tblend=all_mode=average,scale=2560:1440:flags=lanczos,cas=0.25,format=yuv420p',
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '16', '-r', '60',
+      p2_2k,
+    ]);
+    fs.writeFileSync(list2k, `file '${p1_2k}'\nfile '${p2_2k}'\n`);
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-f', 'concat', '-safe', '0', '-i', list2k,
+      '-i', masterAudioWav,
+      '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', '-movflags', '+faststart',
+      OUT_MP4_BRAIN,
+    ]);
+    if (OUT_MP4_BRAIN !== OUT_MP4_SHOWCASE) fs.copyFileSync(OUT_MP4_BRAIN, OUT_MP4_SHOWCASE);
+
+    spawnSync('ffmpeg', ['-y', '-v', 'error', '-i', OUT_FAST_MP4_SHOWCASE, '-t', String(act9StartSec), '-an', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '22', '-r', '30', '-pix_fmt', 'yuv420p', p1_fast]);
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-framerate', String(fps),
+      '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+      '-vf', 'format=yuv420p',
+      '-c:v', 'libx264', '-preset', 'medium', '-crf', '24', '-maxrate', '1350k', '-bufsize', '2700k', '-r', '30',
+      p2_fast,
+    ]);
+    fs.writeFileSync(listFast, `file '${p1_fast}'\nfile '${p2_fast}'\n`);
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-f', 'concat', '-safe', '0', '-i', listFast,
+      '-i', masterAudioWav,
+      '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart',
+      OUT_FAST_MP4_BRAIN,
+    ]);
+    if (OUT_FAST_MP4_BRAIN !== OUT_FAST_MP4_SHOWCASE) fs.copyFileSync(OUT_FAST_MP4_BRAIN, OUT_FAST_MP4_SHOWCASE);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  } else {
+    // 1) Encode 2K Master MP4 (2560x1440 @ 60fps with 180° shutter motion blur + Lanczos + CAS)
+    console.log('🎞️ Encoding 2K Master MP4 (2560x1440 @ 60fps)...');
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-framerate', String(fps),
+      '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+      '-i', masterAudioWav,
+      '-vf', 'framerate=fps=60:interp_start=0:interp_end=255:scene=100,tblend=all_mode=average,scale=2560:1440:flags=lanczos,cas=0.25,format=yuv420p',
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-crf', '16',
+      '-c:a', 'aac',
+      '-b:a', '256k',
+      '-shortest',
+      '-movflags', '+faststart',
+      OUT_MP4_BRAIN,
+    ], { stdio: 'inherit' });
+    if (OUT_MP4_BRAIN !== OUT_MP4_SHOWCASE) fs.copyFileSync(OUT_MP4_BRAIN, OUT_MP4_SHOWCASE);
+
+    // 2) Encode Feishu Instant-Play Fast MP4 (< 9MB, 1920x1080 @ 30fps, +faststart)
+    console.log('📱 Encoding Feishu Instant-Play Fast MP4 (< 9MB)...');
+    spawnSync('ffmpeg', [
+      '-y', '-v', 'error',
+      '-framerate', String(fps),
+      '-i', path.join(FRAMES_DIR, 'frame_%05d.png'),
+      '-i', masterAudioWav,
+      '-vf', 'format=yuv420p',
+      '-c:v', 'libx264',
+      '-preset', 'medium',
+      '-crf', '24',
+      '-maxrate', '1350k',
+      '-bufsize', '2700k',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-shortest',
+      '-movflags', '+faststart',
+      OUT_FAST_MP4_BRAIN,
+    ], { stdio: 'inherit' });
+    if (OUT_FAST_MP4_BRAIN !== OUT_FAST_MP4_SHOWCASE) fs.copyFileSync(OUT_FAST_MP4_BRAIN, OUT_FAST_MP4_SHOWCASE);
+  }
 
   // 3) Build 2160px Feishu Original 3x3 9-Chapter Grid Image & <240KB AI Self-Audit Image
   spawnSync('ffmpeg', [
@@ -2080,7 +2153,7 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
     '-q:v', '2',
     OUT_FEISHU_2K_BRAIN,
   ], { stdio: 'inherit' });
-  fs.copyFileSync(OUT_FEISHU_2K_BRAIN, OUT_FEISHU_2K_SHOWCASE);
+  if (OUT_FEISHU_2K_BRAIN !== OUT_FEISHU_2K_SHOWCASE) fs.copyFileSync(OUT_FEISHU_2K_BRAIN, OUT_FEISHU_2K_SHOWCASE);
 
   spawnSync('ffmpeg', [
     '-y', '-v', 'error',
@@ -2089,7 +2162,7 @@ async function renderFramesAndEncode(htmlPath, totalDurationSec, actTimings, mas
     '-q:v', '6',
     OUT_AI_AUDIT_BRAIN,
   ], { stdio: 'inherit' });
-  fs.copyFileSync(OUT_AI_AUDIT_BRAIN, OUT_AI_AUDIT_SHOWCASE);
+  if (OUT_AI_AUDIT_BRAIN !== OUT_AI_AUDIT_SHOWCASE) fs.copyFileSync(OUT_AI_AUDIT_BRAIN, OUT_AI_AUDIT_SHOWCASE);
 
   // Clean up raw PNG frame cache so disk stays clean
   fs.rmSync(FRAMES_DIR, { recursive: true, force: true });
